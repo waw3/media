@@ -44,32 +44,7 @@ html {
 	height: 100%;
 	min-width: 680px;
 	position: fixed;
-	text-align: center;
 }
-#pup 
-{
-	position:absolute;
-	z-index:200; /* aaaalways on top*/
-	padding: 3px;
-	margin-left: 10px;
-	margin-top: 5px;
-	width: 250px;
-	border: 1px solid black;
-	background-color: #202020;
-	color: white;
-	font-size: 0.95em;
-	opacity: 0.8;
-	text-align: center;
-}
-space
-{
-	display:inline-block;
-	width:150px;
-	margin-right: 10px;
-	margin-bottom:10px;
-	text-align:right;
-}
-
 label
 {
 
@@ -101,7 +76,6 @@ p
 	width: 100%;
 	height: 95%;
 	background-color:#404040;
-	text-align:center;
 	color: #FFFFFF;
 	-moz-box-shadow: 0 0 5px 5px #404040;
 	-webkit-box-shadow: 0 0 5px 5px #404040;
@@ -109,7 +83,6 @@ p
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
-	z-index: 1;
 	overflow-y: -moz-scrollbars-none;
 }
 #center
@@ -126,7 +99,7 @@ p
 #login
 {
 	position: relative;
-	margin: 30 auto;
+	margin: 0 auto;
 }
 #textfield
 {
@@ -144,7 +117,6 @@ p
 	height: 28px;
 	right: 20px;
 	margin-top: 5px;
-	z-index: 2;
 	-moz-box-shadow: 0 0 10px 2px #FFFFFF;
 	-webkit-box-shadow: 0 0   10px 2px #FFFFFF;
 	box-shadow: 0 0 10px 2px #FFFFFF;
@@ -161,6 +133,7 @@ p
 	float: left;
 	margin-top: 5px;
 	padding-right: 5px;
+	padding-left: 5px;
     background-color: #101010;
     max-width: 700px;
 	height: 28px;
@@ -274,9 +247,10 @@ ul li:hover
 #videocontainer
 {
 	display: inline-block;
+	float: left;
 	height: 400px;
 	width: 640px;
-	margin: 0 auto;
+	margin-left: 50px;
 	text-align: center
 }
 .metadataContainer
@@ -286,6 +260,8 @@ ul li:hover
 	width: 182px;
 	margin-top: 50px;
 	float: right;
+	top: 0px;
+	margin-right: 50px;
 	text-align: center;
 	
 }
@@ -333,11 +309,103 @@ ul li:hover
     max-width:95%;
     height:300px;
     margin: 0 auto;
-    text-align:center;
 	white-space: nowrap;
 	background-color: #303030;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
 	overflow-x: -moz-scrollbars-none;
+}
+#recentlyAddedWrapper2
+{
+    max-width:95%;
+    height:300px;
+    margin: 0 auto;
+	white-space: nowrap;
+	background-color: #303030;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	overflow-x: -moz-scrollbars-none;
+	display: none;
+}
+.tableDiv {
+	margin:0px;padding:0px;
+	width:100%;
+}.tableDiv table{
+    border-collapse: collapse;
+    border-spacing: 0;
+
+}.tableDiv tr:last-child td:last-child {
+	-moz-border-radius-bottomright:0px;
+	-webkit-border-bottom-right-radius:0px;
+	border-bottom-right-radius:0px;
+}
+.tableDiv table tr:first-child td:first-child {
+	-moz-border-radius-topleft:0px;
+	-webkit-border-top-left-radius:0px;
+	border-top-left-radius:0px;
+}
+.tableDiv table tr:first-child td:last-child {
+	-moz-border-radius-topright:0px;
+	-webkit-border-top-right-radius:0px;
+	border-top-right-radius:0px;
+}.tableDiv tr:last-child td:first-child{
+	-moz-border-radius-bottomleft:0px;
+	-webkit-border-bottom-left-radius:0px;
+	border-bottom-left-radius:0px;
+}.tableDiv tr:hover td{
+	
+}
+.tableDiv tr:nth-child(odd){ background-color:#adadad; }
+.tableDiv tr:nth-child(even)    { background-color:#6b6b6b; }
+.tableDiv td{
+	vertical-align:middle;
+	align: center;
+	border:1px solid #000000;
+	border-width:0px 1px 1px 0px;
+	text-align:left;
+	padding:7px;
+	font-size:14px;
+	font-family:Arial;
+	font-weight:bold;
+	color:White;
+}.tableDiv tr:last-child td{
+	border-width:0px 1px 0px 0px;
+}.tableDiv tr td:last-child{
+	border-width:0px 0px 1px 0px;
+}.tableDiv tr:last-child td:last-child{
+	border-width:0px 0px 0px 0px;
+}
+.tableDiv tr:first-child td{
+	background:-o-linear-gradient(bottom, #b7b7b7 5%, #b7b7b7 100%);	
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #b7b7b7), color-stop(1, #b7b7b7) );
+	background:-moz-linear-gradient( center top, #b7b7b7 5%, #b7b7b7 100% );
+	background-color:#b7b7b7;
+	border:0px solid #000000;
+	text-align:center;
+	border-width:0px 0px 1px 1px;
+	font-size:14px;
+	font-family:Arial Black;
+	font-weight:bold;
+	color:#ffffff;
+}
+.tableDiv tr:first-child:hover td{
+	background:-o-linear-gradient(bottom, #b7b7b7 5%, #b7b7b7 100%);	
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #b7b7b7), color-stop(1, #b7b7b7) );
+	background:-moz-linear-gradient( center top, #b7b7b7 5%, #b7b7b7 100% );
+	background-color:#b7b7b7;
+}
+.tableDiv tr:first-child td:first-child{
+	border-width:0px 0px 1px 0px;
+}
+.tableDiv tr:first-child td:last-child{
+	border-width:0px 0px 1px 1px;
+}
+.rotate 
+{
+-webkit-transform: rotate(-90deg);
+-moz-transform: rotate(-90deg);
+-ms-transform: rotate(-90deg);
+-o-transform: rotate(-90deg);
 }

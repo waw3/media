@@ -1,6 +1,6 @@
 <?php 
 if($_SERVER['SERVER_PORT'] != '443') { header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); exit(); }
-include "template.php"; 
+require "template.php"; 
 $template = new template();
 $template->startSessionAdmin();
 $con = $template->dbConnect();
@@ -78,7 +78,8 @@ else
 $sql="SELECT ID, username, firstname, lastname, regdate, userGroup , activated FROM users";
 ?>
 <center>
-	<table border="1" style="margin-top: 50px;"> 
+<div class="tableDiv">
+	<table style="margin-top: 50px; min-width: 800px; color: black; "> 
 	<th>ID</th> <th>Username</th> <th>First Name</th> <th>Last Name</th> <th>Date Created</th> <th>User Group</th> <th>Status</th> <th>Option</th>
 
 	<?php // filling table with data from database.
@@ -99,15 +100,15 @@ $sql="SELECT ID, username, firstname, lastname, regdate, userGroup , activated F
 			}
 			elseif($status == 1)
 			{
-				$status = "activated";
+				$status = '<font style="color: #66FF33">activated</font>';
 			}
 			else
 			{
-				$status = "banned";
+				$status = '<font style="color: red">banned</font>';
 			}
 			
 			print "<tr>";
-			print "<td>$id</td> <td>$username</td> <td>$firstname</td> <td>$lastname</td> <td>$dateCreated</td><td>$userGroup</td><td>$status</td><td><button type=\"button\" onclick=\"javascript:location.href='admin.php?edit=$username'\">Edit</button></td>";
+			print "<td>$id</td> <td>$username</td> <td>$firstname</td> <td>$lastname</td> <td>$dateCreated</td><td>$userGroup</td><td>$status</td><td><button type=\"button\" id=\"button\" onclick=\"javascript:location.href='admin.php?edit=$username'\">Edit</button></td>";
 			print "</tr>\n";
 			
 		}
@@ -115,6 +116,7 @@ $sql="SELECT ID, username, firstname, lastname, regdate, userGroup , activated F
 	mysqli_close($con);
 	?>
 	</table>
+	</div>
 	</center>
 <?php 
 }

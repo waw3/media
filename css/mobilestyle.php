@@ -30,10 +30,8 @@
 body 
 {
 	background-color:#202020;
-	margin-top: 0px;
-	margin-bottom: 0px;
+	margin: 0;
 	overflow: hidden;
-
 }
 html {
 	font-family: Verdana, Geneva, sans-serif;
@@ -83,7 +81,6 @@ p
 	position: relative;
 	margin-top: 10px;
 	max-width: 100%;
-	margin-right: 15px;
 	height: 83%;
 	background-color:#404040;
 	text-align:center;
@@ -141,7 +138,8 @@ p
 {
 	color: #FFFFFF;
 	position: absolute; 
-	bottom: 5px; 
+	bottom: 5px;
+	padding-left: 5px;
 	left:0;
     right:0;
     margin-left:auto;
@@ -282,22 +280,18 @@ ul li:hover
 {
 position: relative;
 margin: 0 auto;
-width: 90%;
-text-align: center;
+width: 100%;
+text-align: left;
 }
 #moviePosterContainer
 {
 	display: inline-block;
 	height: 149px;
-	width: 93px;
+	width: 75px;
 	text-align: center;
 	white-space:nowrap;
 	overflow: hidden;
 	vertical-align: top;
-}
-#moviePosterContainer:hover
-{
-	cursor:pointer;
 }
 #posters
 {

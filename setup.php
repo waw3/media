@@ -1,10 +1,34 @@
 <?php 
 error_reporting(E_ERROR | E_PARSE);
-include "template.php"; 
+require "template.php"; 
 $template = new template();
 $template->createPage("Simple Media Streamer");
 if(!empty($_POST['username']))
 {
+	if(!is_dir(getcwd().'/Logs'))
+	{
+		$file = getcwd()."/Logs";
+		if(!mkdir($file,0774,true))
+		{
+			print "<h2>Unable to create file Logs, please check file permissions</h2>";
+		}
+	}
+	if(!is_dir(getcwd().'/config'))
+	{
+		$file = getcwd()."/config";
+		if(!mkdir($file,0774))
+		{
+			print "<h2>Unable to create config, please check file permissions</h2>";
+		}
+	}
+	if(!is_dir(getcwd().'/metadata'))
+	{
+		$file = getcwd()."/metadata";
+		if(!mkdir($file,0774))
+		{
+			print "<h2>Unable to create metadata, please check file permissions</h2>";
+		}
+	}
 	$username = $_POST['username'];
 	$servername = "localhost";
 	$password = $_POST['password'];
@@ -100,6 +124,7 @@ else
 		<space>MySQL password: </space><input type="password" name="password"/> <br />
 		<input type="submit" value="Setup" name="submit" />
 		<?php print $errmsg; ?>
+	
 		</form>
 <?php
 	}

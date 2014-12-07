@@ -1,11 +1,10 @@
 <?php
-error_reporting(0);
-include "template.php"; 
+require "template.php"; 
 $template = new template();
 $template->startSessionRestricted();
 if($_SERVER['SERVER_PORT'] == '443') { header('Location: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); exit(); }
 $dir    = 'movies';
-$files = glob("movies/*.{mp4,mkv,avi}",GLOB_BRACE );
+$files = glob("movies/*.{mp4,mkv}",GLOB_BRACE );
 if(isset($_POST['searchtext'])) //Sombody is searching for a movie so we are giong to filter the array to meet their needs.
 {
 	if(!empty($_POST['searchtext']))
@@ -17,7 +16,6 @@ if(isset($_POST['searchtext'])) //Sombody is searching for a movie so we are gio
 if(isset($_GET["movie"])) //The GET variable is set so someone is probably trying to watch a movie
 {
 	$type = substr($_GET['movie'],strlen($_GET['movie'])-3);
-	if($type == "mkv"){ $type=""; $type = "mp4"; }
 	$plainTextMovieName = substr($_GET['movie'],0,strlen($_GET['movie'])-4);
 	$movieinfo = file_get_contents("metadata/".$plainTextMovieName.".txt");
 	$movieinfo = explode("<br>",$movieinfo);
@@ -31,18 +29,19 @@ if(isset($_GET["movie"])) //The GET variable is set so someone is probably tryin
 }
 else
 {
-	$template->createPage("Simple Media Streamer");
-	$template->loadBar();
+	$template->createPage("Simple Media Streamer", "customScrollLazyLoad");
 }
-
-		//echo $template->compareDate($template->secondsToTime($_SESSION['activity'])).PHP_EOL;
 if($get) //loads the videoplayer if $get is true.
-{ 
+{
 	$template->videojsScripts();
+	if($type != "mp4")
+	{
+		echo "<h2>Needs to be transcoded!</h2>".PHP_EOL;
+	}
 	if($template->isMobile())
 	{
 		echo '<center>'.PHP_EOL;
-		$template->videojs($dir, 320,180,"video/$type");
+		$template->videojs($dir, 320,180);
 		echo '</center>'.PHP_EOL;
 	}
 	else
@@ -54,7 +53,7 @@ if($get) //loads the videoplayer if $get is true.
 		$height = 360;
 		$width = 640;
 		if($template->isMobile()) { $height = 180; $width = 320; }
-		$template->videojs($dir, $width, $height,"video/$type");
+		$template->videojs($dir, $width, $height);
 		echo '<p style="text-align: left;text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$moviePlot.'</p>'.PHP_EOL;
 		echo '</div>'.PHP_EOL;
 		echo '<div class="metadataContainer">'.PHP_EOL;
@@ -83,11 +82,11 @@ else // if get is false then we load the movie list.
 	}
 	// We shall load the recently added content first.
 	echo '<h1>Recently Added</h1>'.PHP_EOL;
-	echo '<div id="recentlyAddedWrapper" style="text-align: center;" >'.PHP_EOL;
+	echo '<div id="recentlyAddedWrapper" >'.PHP_EOL;
 	foreach($recentlyAddedContent as $value) //Loop through all the movies detected in the addedContent file.
 	{ 
 		$getvalue = urlencode($value);
-		$movies = file_get_contents("metadata/".substr($value,0,strlen($value)-5).".txt");
+		$movies = file_get_contents("metadata/".substr($value,0,strlen($value)-4).".txt");
 		$title = substr($value,0,strlen($value)-4);
 		$title2 = $title;
 		if(strlen($title) > 17) { $title = substr($title,0,17) . "..."; }
@@ -106,7 +105,7 @@ else // if get is false then we load the movie list.
 	}
 	echo '</div>'.PHP_EOL;	
 	echo '<h1>Movies</h1>'.PHP_EOL;	
-	echo '<div id="movieWrapper">'.PHP_EOL;				 
+	echo '<div id="movieWrapper" style="text-align: center;">'.PHP_EOL;				 
 	foreach($files as $value) 
 	{ 
 		$value = basename($value);

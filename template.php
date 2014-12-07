@@ -19,10 +19,12 @@ class template
 	{
 			session_start();
 			$con = $this->dbConnect();
+			$suppliedUser = mysqli_real_escape_string($con, $suppliedUser);
+			$suppliedPass = mysqli_real_escape_string($con, $suppliedPass);
 			$sql = "SELECT id, username, password, userGroup, activated FROM users WHERE username = '$suppliedUser' LIMIT 1;"; //sql query to get the information from the database
 			$query = mysqli_query($con, $sql);
 			$row = mysqli_fetch_row($query);
-			if($row[4] == 0){
+			if($row[4] === 0){
 				return "<h2>Account isn't active.</h2>";
 			}
 			elseif($row[4] == 2)
@@ -60,7 +62,6 @@ class template
 		{
 		?>
 			<link href="/media/css/style.php" rel="stylesheet" type="text/css" />
-			<link rel="stylesheet" href="css/jquery.mCustomScrollbar.css" />
 		<?php
 		}
 	}
@@ -211,44 +212,17 @@ class template
 			header("Location: $dir");
 		}
 	}
-	public function videojsScripts() //if you're going to use videojs you're going to need to call this first.
+	public function customScrollLazyLoad()
 	{
-	?>
-	
-		<link href="http://vjs.zencdn.net/4.10/video-js.css" rel="stylesheet">
-		<script src="javascript/video.js"></script>
-		<style type="text/css">
-		.vjs-default-skin .vjs-play-progress,
-		.vjs-default-skin .vjs-volume-level { background-color: #ff0000 }
-				<?php if(!$this->isMobile())
-		{
-			print '.vjs-default-skin .vjs-control-bar { font-size: 120% }'.PHP_EOL;
-		}
-		?>
-		.vjs-default-skin .vjs-big-play-button { background: rgba(0,0,0,1) }
-		.vjs-default-skin .vjs-slider background: rgba(0,0,0,0.3333333333333333) }
-		</style>
-	<?php
-	}
-	public function createPage($title) //creates opening tags and accepts a page title..
-	{	
-?>
-		<!doctype html>
-		<html>
-		<head>
-		<title><?php echo $title; ?></title>
-		<meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-		<meta http-equiv="Cache-control" content="public">
-		<meta charset="UTF-8">
-		<script src="javascript/jquery-2.1.0.min.js"></script>
-		<?php
 		if (!$this->isMobile())
 		{ 
 		?>
+		<script src="javascript/jquery-2.1.0.min.js"></script>
 		<script src="javascript/jquery.mCustomScrollbar.concat.min.js"></script>
+		<link rel="stylesheet" href="css/jquery.mCustomScrollbar.css" />
 		<script>
 			(function($){
-				$(window).load(function(){
+				$( document ).ready(function(){
 					$("#recentlyAddedWrapper").mCustomScrollbar({
 						axis:"x",
 						scrollbarPosition: "inside",
@@ -267,10 +241,25 @@ class template
 		</script>
 		<?php
 		}
+	}
+	public function createPage($title, $function = "") //creates opening tags and accepts a page title..
+	{	
+?>
+		<!doctype html>
+		<html>
+		<head>
+		<title><?php echo $title; ?></title>
+		<meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<meta http-equiv="Cache-control" content="public">
+		<meta charset="UTF-8">
+		<?php
+		
+		if(!empty($function)){$this->$function(); $this->loadBar();}
 ?>
 		</head>	
 		<body>
-		<?php $this->styles(); ?>
+		<?php $this->styles(); 
+		?>
 		<div id ="wrapper">
 		<div id="searchbar">
 		<form action ="movies.php" method="post" style="margin-top: 5px;">
@@ -314,7 +303,20 @@ class template
 		$s = $seconds % 60;
 		return sechof("%02d:%02d:%02d", $H, $i, $s);
 	}
-	function videojs($videoname, $width, $height, $type)
+	function videojsScripts()
+	{
+	?>
+		<link href="http://vjs.zencdn.net/4.10/video-js.css" rel="stylesheet">
+		<script src="http://vjs.zencdn.net/4.10/video.js"></script>
+		<style type="text/css">
+		.vjs-default-skin .vjs-play-progress,
+		.vjs-default-skin .vjs-volume-level { background-color: #ff0000 }
+		.vjs-default-skin .vjs-big-play-button { background: rgba(0,0,0,1) }
+		.vjs-default-skin .vjs-slider background: rgba(0,0,0,0.3333333333333333) }
+		</style>
+	<?php
+	}
+	function videojs($videoname, $width, $height)
 	{
 		if($this->isMobile())
 		{
@@ -322,22 +324,13 @@ class template
 			//$height = $height/2;
 		}
 		?>
-		<video id="MY_VIDEO_1" class="video-js vjs-default-skin vjs-big-play-centered"  controls
-		preload="auto" width="<?php print $width; ?>" height="<?php print $height; ?>"
+		<video id="MY_VIDEO_1" class="video-js vjs-default-skin vjs-big-play-centered"  controls preload="false"
+		width="<?php print $width; ?>" height="<?php print $height; ?>"
 		data-setup="{}">
-		<source src="<?php print $videoname; ?>" type='<?php print $type; ?>'>
+		<source src="<?php print $videoname; ?>" type='video/mp4'>
 		<p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
 		</video>
 		<?php
-	}
-	function html5Video($videoname, $width, $height, $type)
-	{
-	?>
-		<video style="background-color: black;" width="<?php print $width; ?>" height="<?php print $height; ?>" controls>
-		<source src="<?php print $videoname; ?>" type="<?php print $type; ?>">
-		Your browser does not support the video tag.
-		</video>
-	<?php
 	}
 	function lazyload($container)
 	{

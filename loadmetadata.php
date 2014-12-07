@@ -6,8 +6,9 @@ ini_set("max_execution_time", 1800);
 $files = glob("movies/*.{mp4,mkv,avi}",GLOB_BRACE );
 $f = fopen("Logs/addedContent.log", 'a');
 $cLog = fopen("Logs/sms-content.log", 'a');
+$dbLog = fopen("Logs/db.log", 'a');
 $newContent = false;
-foreach($files as $value) 
+foreach($files as $value)
 {
 $newContent = false;
 	$value = basename($value);
@@ -30,6 +31,16 @@ $newContent = false;
 				fwrite($cLog, "\t".$logmsg."\n");
 			}
 		}
+		else
+		{
+			$json=file_get_contents("http://api.themoviedb.org/3/search/movie?query=$getvalue&api_key=4562bc01bb2592ec113b813da74a0f58");
+			$details=json_decode($json);
+			if($details->total_results >= 1)
+			{
+				echo "We have a match!".PHP_EOL;
+			}
+			
+		}
 	}
 	if(!file_exists("metadata/$title.txt"))
 	{
@@ -49,9 +60,13 @@ $newContent = false;
 		{
 			file_put_contents("metadata/$title".".txt","No information");
 		}
-		if($newContent){fwrite($f,$value."\n");}
+		if($newContent)
+		{
+			fwrite($f,$value."\n");
+		}
 	}
 }
 fclose($f);
 fclose($cLog);
+fclose($dbLog);
 ?>
