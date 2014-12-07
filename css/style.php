@@ -96,7 +96,7 @@ p
 	-webkit-box-shadow: 0 0   10px 2px #200000;
 	box-shadow: 0 0 10px 2px #200000;
 }
-#login
+#centerform
 {
 	position: relative;
 	margin: 0 auto;

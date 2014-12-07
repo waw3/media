@@ -119,11 +119,12 @@ else
 	{
 ?>
 		<h1>Setup Database</h1>
-		<form action="setup.php" method="post" enctype="multipart/form-data">
-	    <space>MySQL root: </space><input type="text" name="username" required/> <br />
-		<space>MySQL password: </space><input type="password" name="password"/> <br />
-		<input type="submit" value="Setup" name="submit" />
-		<?php print $errmsg; ?>
+		<form id="centerform" action="setup.php" method="post" enctype="multipart/form-data" style="width: 350px;">
+		<p>MySQL root: <input type="text" name="username" required/></p>
+		<p>MySQL password: <input type="password" name="password" required/></p>
+		<input id="button" type="submit" value="Setup" name="submit" /><br>
+				<?php print $errmsg; ?>
+	</form>
 	
 		</form>
 <?php

@@ -9,7 +9,7 @@ if(isset($_POST['username'])) // checking if that variable is set, when the form
 $template->createPage("Login");
 ?>
 	<h1>Login</h1>
-	<form id="login" action="login.php" method="post" enctype="multipart/form-data" style="width: 300px;">
+	<form id="centerform" action="login.php" method="post" enctype="multipart/form-data" style="width: 300px;">
 		<p>Username: <input type="text" name="username" required/></p>
 		<p>Password: <input type="password" name="password" required/></p>
 		<input id="button" type="submit" value="Login" name="submit" /><br>
