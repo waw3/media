@@ -357,8 +357,8 @@ ul li:hover
 }.tableDiv tr:hover td{
 	
 }
-.tableDiv tr:nth-child(odd){ background-color:#adadad; }
-.tableDiv tr:nth-child(even)    { background-color:#6b6b6b; }
+.tableDiv tr:nth-child(odd){ background-color:#202020; }
+.tableDiv tr:nth-child(even)    { background-color:#303030; }
 .tableDiv td{
 	vertical-align:middle;
 	align: center;
@@ -402,10 +402,4 @@ ul li:hover
 .tableDiv tr:first-child td:last-child{
 	border-width:0px 0px 1px 1px;
 }
-.rotate 
-{
--webkit-transform: rotate(-90deg);
--moz-transform: rotate(-90deg);
--ms-transform: rotate(-90deg);
--o-transform: rotate(-90deg);
-}
+.tableDiv th { color: white; padding:7px; }

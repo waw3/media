@@ -2,9 +2,8 @@
 require "template.php"; 
 $template = new template();
 $template->startSessionRestricted();
-if($_SERVER['SERVER_PORT'] == '443') { header('Location: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); exit(); }
 $dir    = 'movies';
-$files = glob("movies/*.{mp4,mkv}",GLOB_BRACE );
+$files = glob("metadata/*txt");
 if(isset($_POST['searchtext'])) //Sombody is searching for a movie so we are giong to filter the array to meet their needs.
 {
 	if(!empty($_POST['searchtext']))
@@ -15,17 +14,18 @@ if(isset($_POST['searchtext'])) //Sombody is searching for a movie so we are gio
 
 if(isset($_GET["movie"])) //The GET variable is set so someone is probably trying to watch a movie
 {
+	if($_SERVER['SERVER_PORT'] == '443') { header('Location: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); exit(); }
 	$type = substr($_GET['movie'],strlen($_GET['movie'])-3);
 	$plainTextMovieName = substr($_GET['movie'],0,strlen($_GET['movie'])-4);
 	$movieinfo = file_get_contents("metadata/".$plainTextMovieName.".txt");
-	$movieinfo = explode("<br>",$movieinfo);
+	$movieinfo = explode("\n",$movieinfo);
 	$dir = $dir . "/" . html_entity_decode($_GET['movie']);
 	$template->createPage($plainTextMovieName);
 	$get=true;
 	$title = urlencode($plainTextMovieName);
-	$movieTitle = $movieinfo[0];
-	$movieRating = $movieinfo[1];
-	$moviePlot = $movieinfo[3];
+	$movieTitle = $movieinfo[1];
+	$movieRating = $movieinfo[2];
+	$moviePlot = $movieinfo[4];
 }
 else
 {
@@ -57,9 +57,9 @@ if($get) //loads the videoplayer if $get is true.
 		echo '<p style="text-align: left;text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$moviePlot.'</p>'.PHP_EOL;
 		echo '</div>'.PHP_EOL;
 		echo '<div class="metadataContainer">'.PHP_EOL;
-		$poster = "movie";
-		if(file_exists("metadata/$plainTextMovieName.jpeg")) { $poster = $plainTextMovieName; }
-		echo '<img src="metadata/'.$poster.'.jpeg"  id="posters" width="'.$width.'" height="'.$height.'">'.PHP_EOL;
+		$poster = "images/movie";
+		if(file_exists("metadata/$plainTextMovieName.jpeg")) { $poster = "metadata/".$plainTextMovieName; }
+		echo '<img src="'.$poster.'.jpeg"  id="posters" width="'.$width.'" height="'.$height.'">'.PHP_EOL;
 		echo "<p style=\"margin-top: 5px;text-align: center;text-shadow: 5px 3px 5px rgba(0,0,0,0.75); \">$movieRating</p>".PHP_EOL;
 		echo '</div>'.PHP_EOL;
 		echo '</div>'.PHP_EOL;
@@ -99,7 +99,7 @@ else // if get is false then we load the movie list.
 		}
 		else 
 		{
-			echo '<img  id="posters" alt="'.$title2.'" src="'."metadata/movie".'.jpeg" width="'.$width.'" height="'.$height.'"\'>'; 
+			echo '<img  id="posters" alt="'.$title2.'" src="'."images/movie".'.jpeg" width="'.$width.'" height="'.$height.'"\'>'; 
 		}
 		echo '</div>'.PHP_EOL;
 	}
@@ -107,13 +107,13 @@ else // if get is false then we load the movie list.
 	echo '<h1>Movies</h1>'.PHP_EOL;	
 	echo '<div id="movieWrapper" style="text-align: center;">'.PHP_EOL;				 
 	foreach($files as $value) 
-	{ 
+	{
 		$value = basename($value);
-		$getvalue = urlencode($value);
-		$movies = file_get_contents("metadata/".substr($value,0,strlen($value)-4).".txt");
+		$movieinfo = file_get_contents("metadata/".$value);
+		$movieinfo = explode("\n",$movieinfo);
+		$getvalue = urlencode(substr($value,0,strlen($value)-4).$movieinfo[0]);
 		$title = substr($value,0,strlen($value)-4);
 		$title2 = substr($value,0,strlen($value)-4);
-		$value = urlencode(substr($value,0,strlen($value)-4));
 		if(strlen($title) > 17)
 		{
 			$title = substr($title,0,17) . "...";
@@ -131,7 +131,7 @@ else // if get is false then we load the movie list.
 		}
 		else
 		{
-			echo '<img  id="posters" alt="'.$title2.'" src="'."metadata/movie".'.jpeg" width="'.$width.'" height="'.$height.'"\'>';
+			echo '<img  id="posters" alt="'.$title2.'" src="'."images/movie".'.jpeg" width="'.$width.'" height="'.$height.'"\'>';
 		}
 		echo '</div>'.PHP_EOL;
 	}
