@@ -1,8 +1,7 @@
 <?php
 function metadata($num)
 {
-	$f = fopen("Logs/test$num.log", 'a');
-	file_put_contents("Logs/test$num.log","");
+	$f = fopen("Logs/addedContent.log", 'a');
 	ini_set("max_execution_time", 1800);
 	$files = glob("movies/*.{mp4,mkv,avi}",GLOB_BRACE );
 	$fCount = (int)(count($files) / 16);
@@ -94,6 +93,10 @@ function metadata($num)
 					$image = "http://image.tmdb.org/t/p/w150/$path";
 					file_put_contents("metadata/$name".".jpeg",file_get_contents($image));
 				}	
+			}
+			if($newContent)
+			{
+				fwrite($f,$name.$type."\n");
 			}
 
 		}
