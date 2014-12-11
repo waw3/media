@@ -104,7 +104,7 @@ else // if get is false then we load the movie list.
 		echo '</div>'.PHP_EOL;
 	}
 	echo '</div>'.PHP_EOL;	
-	echo '<h1>Movies</h1>'.PHP_EOL;	
+	echo '<h1>Movies('.count($files).')</h1>'.PHP_EOL;	
 	echo '<div id="movieWrapper" style="text-align: center;">'.PHP_EOL;				 
 	foreach($files as $value) 
 	{

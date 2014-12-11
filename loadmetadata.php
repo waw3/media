@@ -1,100 +1,103 @@
 <?php
-include "template.php"; 
-$template = new template();
-$template->startSessionAdmin();
-ini_set("max_execution_time", 1800);
-$files = glob("movies/*.{mp4,mkv,avi}",GLOB_BRACE );
-$f = fopen("Logs/addedContent.log", 'a');
-$cLog = fopen("Logs/sms-content.log", 'a');
-$dbLog = fopen("Logs/db.log", 'a');
-$newContent = false;
-foreach($files as $value)
+function metadata($num)
 {
-$newContent = false;
-	$value = basename($value);
-	$title = substr($value,0,strlen($value)-4);
-	
-	if(!(strpos($title," ") === false)) { $getvalue = urlencode($title); }
-	else { $getvalue = $title; }
-	if(!file_exists("metadata/$title.jpeg")) //If the picture doesn't exist then search database for it.
+	$f = fopen("Logs/test$num.log", 'a');
+	file_put_contents("Logs/test$num.log","");
+	ini_set("max_execution_time", 1800);
+	$files = glob("movies/*.{mp4,mkv,avi}",GLOB_BRACE );
+	$fCount = (int)(count($files) / 16);
+	if($num == 15)
 	{
-		$newContent = true;
-		$json=file_get_contents("http://www.omdbapi.com/?t=$getvalue");
-		$details=json_decode($json);
-		if($details->Response=='True')
-		{   
-			$image = $details->Poster;
-			if(strpos($image,'N/A') === false)
+		$fCount2 = $fCount + ((count($files) % 16));
+		$files = array_slice($files,$num*$fCount,$fCount2);
+	}
+	else
+	{
+		$files = array_slice($files,$num*$fCount,$fCount);
+	}
+	foreach($files as $movie)
+	{
+		// By default false.
+		$newContent = false;
+		// Saving file type.
+		$type = substr($movie,strlen($movie)-4); 
+		// Removing file type from the end.
+		$movie = substr(basename($movie),0,strlen(basename($movie))-4); 
+		// saving original movie name.
+		$name = $movie;
+		if(!(file_exists("metadata/$name.jpeg") && file_exists("metadata/$name.txt")))
+		{
+			// generally if there are more periods then it might have a file name not suitable for searching so we shall try and fix that.
+			if(strpos($movie,'.') !== false)
 			{
-				file_put_contents("metadata/$title".".jpeg",file_get_contents($image));
-				$file = str_replace(" ","\ ", $title.".jpeg");
-				$logmsg = shell_exec("/usr/local/bin/convert -size 300x444 metadata/$file -resize 150x222 metadata/$file 2>&1");	
-				fwrite($cLog, "/usr/local/bin/convert -size 300x444 metadata/$file -resize 150x222 metadata/$file 2>&1\n");
-				fwrite($cLog, "\t".$logmsg."\n");
+				//splitting file from periods.
+				$movie = preg_split('/[.]/', $movie);
+				// Filtering to remove unwanted content.
+				$movie = array_filter($movie, create_function('$var','return !(preg_match("/(?:mp4|avi|mkv)|(?:HDTV|bluray|WEB-DL|IMAX|EDITION|DTS|DrunkinRG|\w{2,3}rip)|(?:x264)|(?:\d{4})|(?:\d{3,4}p)|(?:AC\d)/i", $var));'));
+				// Adding it all back together.
+				$movie = join(' ', $movie);
+			}
+			
+			// Making string more url friendly.
+			$urlMovie = urlencode($movie);
+			// Searching database for movie information.
+			$json = file_get_contents("http://www.omdbapi.com/?t=$urlMovie");
+			$results=json_decode($json);
+			// Checking if we received a valid response.
+			if($results->Response == 'True')
+			{
+				$newContent = true;
+				$movieinfo = $type."\n";
+				$movieinfo = $movieinfo . $results->Title.'('.$results->Year.")\n";
+				$movieinfo = $movieinfo . "Rated : ".$results->Rated . "\n";
+				$movieinfo = $movieinfo . "Runtime : ".$results->Runtime."\n";
+				$movieinfo = $movieinfo . $movieInfo . "Plot : ".$results->Plot."\n";
+				file_put_contents("metadata/$name".".txt",$movieinfo);
+				// Making sure that there is a poster before saving a file.
+				if(!($results->Poster == 'N/A'))
+				{
+					//We got this far so that means there is new content.
+					file_put_contents("metadata/$name".".jpeg",file_get_contents($results->Poster));
+					$file = str_replace(" ","\ ", $name.".jpeg");
+					shell_exec("/usr/local/bin/convert -size 300x444 metadata/$file -resize 150x222 metadata/$file 2>&1");
+				}
+				// If there is no poster, don't give up hope lets try another database!
+				else
+				{
+					$movieinfo = "";
+					$json=file_get_contents("http://api.themoviedb.org/3/search/movie?query=$urlMovie&api_key=4562bc01bb2592ec113b813da74a0f58");
+					$results=json_decode($json);
+					if($results->total_results >= 1)
+					{
+						$newContent = true;
+						$path = $results->results[0]->poster_path;
+						$image = "http://image.tmdb.org/t/p/w150/$path";
+						file_put_contents("metadata/$name".".jpeg",file_get_contents($image));
+					}	
+				}
 			}
 			else
 			{
 				$movieinfo = "";
-				$json=file_get_contents("http://api.themoviedb.org/3/search/movie?query=$getvalue&api_key=4562bc01bb2592ec113b813da74a0f58");
-				$details=json_decode($json);
-				if($details->total_results >= 1)
+				$json=file_get_contents("http://api.themoviedb.org/3/search/movie?query=$urlMovie&api_key=4562bc01bb2592ec113b813da74a0f58");
+				$results=json_decode($json);
+				if($results->total_results >= 1)
 				{
-					$path = $details->results[0]->poster_path;
+					$newContent = true;
+					$movieinfo = $type."\n";
+					$movieinfo = $movieinfo . $results->results[0]->original_title.'('.substr($results->results[0]->release_date,0,4).")\n";
+					$movieinfo = $movieinfo . "Rated : Unknown\n";
+					$movieinfo = $movieinfo . "Runtime : Unknown\n";
+					$movieinfo = $movieinfo . "Plot : Unknown\n";
+					file_put_contents("metadata/$name".".txt",$movieinfo);
+					$path = $results->results[0]->poster_path;
 					$image = "http://image.tmdb.org/t/p/w150/$path";
-					file_put_contents("metadata/$title".".jpeg",file_get_contents($image));
-					$file = str_replace(" ","\ ", $title.".jpeg");
-					$logmsg = shell_exec("/usr/local/bin/convert -size 300x444 metadata/$file -resize 150x222 metadata/$file 2>&1");	
-					fwrite($cLog, "/usr/local/bin/convert -size 300x444 metadata/$file -resize 150x222 metadata/$file 2>&1\n");
-					fwrite($cLog, "\t".$logmsg."\n");
-				
+					file_put_contents("metadata/$name".".jpeg",file_get_contents($image));
 				}	
 			}
+
 		}
-		else
-		{
-			$movieinfo = "";
-			$json=file_get_contents("http://api.themoviedb.org/3/search/movie?query=$getvalue&api_key=4562bc01bb2592ec113b813da74a0f58");
-			$details=json_decode($json);
-			if($details->total_results >= 1)
-			{
-				$path = $details->results[0]->poster_path;
-				$image = "http://image.tmdb.org/t/p/w150/$path";
-				file_put_contents("metadata/$title".".jpeg",file_get_contents($image));
-				$file = str_replace(" ","\ ", $title.".jpeg");
-				$logmsg = shell_exec("/usr/local/bin/convert -size 300x444 metadata/$file -resize 150x222 metadata/$file 2>&1");	
-				fwrite($cLog, "/usr/local/bin/convert -size 300x444 metadata/$file -resize 150x222 metadata/$file 2>&1\n");
-				fwrite($cLog, "\t".$logmsg."\n");
-				
-			}	
-			
-		}
-	}
-	if(!file_exists("metadata/$title.txt"))
-	{
-		$newContent = true;
-		$movieinfo = "";
-		$json=file_get_contents("http://www.omdbapi.com/?t=$getvalue");
-		$details=json_decode($json);
-		if($details->Response=='True')
-		{   $movieinfo = substr($value,strlen($value)-4)."\n";
-			$movieinfo = $movieinfo . $details->Title.'('.$details->Year.")\n";
-			$movieinfo = $movieinfo . "Rated : ".$details->Rated . "\n";
-			$movieinfo = $movieinfo . "Runtime : ".$details->Runtime."\n";
-			$movieinfo = $movieinfo . $movieInfo . "Plot : ".$details->Plot."\n";
-			file_put_contents("metadata/$title".".txt",$movieinfo);
-		}
-		else
-		{
-			$movieinfo = substr($value,strlen($value)-4)."\nNo information";
-			file_put_contents("metadata/$title".".txt",$movieinfo);
-		}
-		if($newContent)
-		{
-			fwrite($f,$value."\n");
-		}
+		
 	}
 }
-fclose($f);
-fclose($cLog);
-fclose($dbLog);
 ?>

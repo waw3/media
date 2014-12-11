@@ -29,9 +29,9 @@ if(!empty($_POST['username']))
 			print "<h2>Unable to create metadata, please check file permissions</h2>";
 		}
 	}
-	$username = mysql_real_escape_string($_POST['username']);
+	$username = $_POST['username'];
 	$servername = "localhost";
-	$password = mysql_real_escape_string($_POST['password']);
+	$password = $_POST['password'];
 	if(!empty($_POST['password']))
 	{
 		if ( ! $conn = mysqli_connect($servername, $username, $password))
