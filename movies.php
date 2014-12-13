@@ -2,7 +2,6 @@
 require "template.php"; 
 $template = new template();
 $template->startSessionRestricted();
-$dir    = 'movies';
 $files = glob("metadata/*txt");
 if(isset($_POST['searchtext'])) //Sombody is searching for a movie so we are giong to filter the array to meet their needs.
 {
@@ -19,7 +18,7 @@ if(isset($_GET["movie"])) //The GET variable is set so someone is probably tryin
 	$plainTextMovieName = substr($_GET['movie'],0,strlen($_GET['movie'])-4);
 	$movieinfo = file_get_contents("metadata/".$plainTextMovieName.".txt");
 	$movieinfo = explode("\n",$movieinfo);
-	$dir = $dir . "/" . html_entity_decode($_GET['movie']);
+	$dir = "movies/" . html_entity_decode($_GET['movie']);
 	$template->createPage($plainTextMovieName);
 	$get=true;
 	$title = urlencode($plainTextMovieName);
@@ -33,15 +32,36 @@ else
 }
 if($get) //loads the videoplayer if $get is true.
 {
+	$vTranscode = false;
+	$aTranscode = false;
+	$tTranscode = false;
 	$template->videojsScripts();
-	if($type != "mp4")
+	$vCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 | grep h264 | grep Stream | wc -l");
+	$aCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 | grep aac | grep Stream | wc -l");
+	if($vCount != 1){ $vTranscode = true; }
+	if($aCount != 1){ $aTranscode = true; }
+		if($type == "mkv") { $type = "mp4"; }
+	if($type != "mp4") { $tTranscode = true; }
+	$length = "";
+	if($vTranscode || $aTranscode || $tTranscode)
 	{
-		echo "<h2>Needs to be transcoded!</h2>".PHP_EOL;
+		
+		$type = "mp4";
+		$length = shell_exec("/usr/local/bin/ffmpeg -i $dir 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
+		$length = explode(":",$length);
+		$length = $length[0]*3600 + $length[1]*60 + $length[2];
+		$f = fopen("metadata/".basename($dir).".js", 'w');;
+		$json = array('duration' => $length);
+		fwrite($f,json_encode($json));
+		$meta = "metadata/".basename($dir).".js";
+		fclose($f);
+		$dir = "transcode.php?movie=".basename($dir);
+		
 	}
 	if($template->isMobile())
 	{
 		echo '<center>'.PHP_EOL;
-		$template->videojs($dir, 320,180);
+		$template->videojs($dir, 320,180, $type);
 		echo '</center>'.PHP_EOL;
 	}
 	else
@@ -53,7 +73,8 @@ if($get) //loads the videoplayer if $get is true.
 		$height = 360;
 		$width = 640;
 		if($template->isMobile()) { $height = 180; $width = 320; }
-		$template->videojs($dir, $width, $height);
+		if(!empty($length)){ $template->videojs($dir, $width, $height, $type, $length, $meta); }
+		else { $template->videojs($dir, $width, $height, $type); }
 		echo '<p style="text-align: left;text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$moviePlot.'</p>'.PHP_EOL;
 		echo '</div>'.PHP_EOL;
 		echo '<div class="metadataContainer">'.PHP_EOL;
@@ -87,8 +108,9 @@ else // if get is false then we load the movie list.
 	{ 
 		$getvalue = urlencode($value);
 		$movies = file_get_contents("metadata/".substr($value,0,strlen($value)-4).".txt");
-		$title = substr($value,0,strlen($value)-4);
-		$title2 = $title;
+		$movies = explode("\n",$movies);
+		$title = substr($movies[1],0,strpos($movies[1],"("));
+		$title2 = substr($value,0,strlen($value)-4);
 		if(strlen($title) > 17) { $title = substr($title,0,17) . "..."; }
 		if($movies == "No information") { $movies = $title2; }
 		echo '<div id="moviePosterContainer" style="margin-top: 10px;" onclick=\'javascript:location.href="/media/movies.php?movie='.$getvalue.'"\'>'.PHP_EOL;
@@ -112,7 +134,7 @@ else // if get is false then we load the movie list.
 		$movieinfo = file_get_contents("metadata/".$value);
 		$movieinfo = explode("\n",$movieinfo);
 		$getvalue = urlencode(substr($value,0,strlen($value)-4).$movieinfo[0]);
-		$title = substr($value,0,strlen($value)-4);
+		$title = substr($movieinfo[1],0,strpos($movieinfo[1],"("));
 		$title2 = substr($value,0,strlen($value)-4);
 		if(strlen($title) > 17)
 		{
@@ -127,11 +149,11 @@ else // if get is false then we load the movie list.
 		echo '<label style="cursor:pointer; text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$title.'</label><br>'.PHP_EOL;
 		if(file_exists("metadata/$title2.jpeg"))
 		{
-			echo '<img   id="posters" alt="'.$title2.'"  src="'."metadata/$title2".'.jpeg" width="'.$width.'" height="'.$height.'">'.PHP_EOL;
+			echo '<img class="lazy img-responsive" id="posters" alt="'.$title2.'" src="images/holder.jpg" data-original="'."metadata/$title2".'.jpeg" width="'.$width.'" height="'.$height.'">'.PHP_EOL;
 		}
 		else
 		{
-			echo '<img  id="posters" alt="'.$title2.'" src="'."images/movie".'.jpeg" width="'.$width.'" height="'.$height.'"\'>';
+			echo '<img class="lazy img-responsive" id="posters" alt="'.$title2.'" src="images/holder.jpg" data-original="'."images/movie".'.jpeg" width="'.$width.'" height="'.$height.'"\'>';
 		}
 		echo '</div>'.PHP_EOL;
 	}

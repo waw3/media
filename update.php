@@ -5,7 +5,6 @@ $template->startSessionAdmin();
 $files = glob("metadata/*txt");
 $movies = glob("movies/*.{mp4,mkv,avi}",GLOB_BRACE );
 $count = shell_exec('pgrep -f loadmetadata | wc -l');
-echo $count;
 if($count < 2)
 {
 	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(0);" > /dev/null &');

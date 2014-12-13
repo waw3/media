@@ -108,7 +108,7 @@ $sql="SELECT ID, username, firstname, lastname, regdate, userGroup , activated F
 			}
 			
 			print "<tr>";
-			print "<td>$id</td> <td>$username</td> <td>$firstname</td> <td>$lastname</td> <td>$dateCreated</td><td>$userGroup</td><td>$status</td><td><button type=\"button\" id=\"button\" onclick=\"javascript:location.href='admin.php?edit=$username'\">Edit</button></td>";
+			print "<td>$id</td> <td>$username</td> <td>$firstname</td> <td>$lastname</td> <td>$dateCreated</td><td>$userGroup</td><td>$status</td><td><button type=\"button\" id=\"button\" style=\"background: none; onclick=\"javascript:location.href='admin.php?edit=$username'\">Edit</button></td>";
 			print "</tr>\n";
 			
 		}

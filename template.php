@@ -38,6 +38,7 @@ class template
 				$_SESSION['username'] = $row[1]; //setting session variables.
 				$_SESSION['activity'] = time();
 				$_SESSION['group'] = $row[3];
+				$_SESSION['transcode'] = "";
 				header("Location: $root ");
 			} 
 			else
@@ -194,6 +195,13 @@ class template
 				$this->setClass('class="newUser"');
 			}
 		}
+		if(!empty($_SESSION['transcode']))
+		{
+			$name = $_SESSION['transcode'];
+			exec("pkill -f $name");
+			unlink("live/$name.mp4");
+			$_SESSION['transcode'] = "";
+		}
 }
 	public function getClass()
 	{
@@ -217,28 +225,7 @@ class template
 		if (!$this->isMobile())
 		{ 
 		?>
-		<script src="javascript/jquery-2.1.0.min.js"></script>
-		<script src="javascript/jquery.mCustomScrollbar.concat.min.js"></script>
-		<link rel="stylesheet" href="css/jquery.mCustomScrollbar.css" />
-		<script>
-			(function($){
-				$( document ).ready(function(){
-					$("#recentlyAddedWrapper").mCustomScrollbar({
-						axis:"x",
-						scrollbarPosition: "inside",
-						autoHideScrollbar: true,
-						advanced:{autoExpandHorizontalScroll:true}
-					});
-					$("#main").mCustomScrollbar({
-							axis:"y",
-							scrollbarPosition: "inside",
-							autoHideScrollbar: true,
-							advanced:{autoExpandHorizontalScroll:true},
-							setRight: "500px"
-					});
-				});
-			})(jQuery);
-		</script>
+		
 		<?php
 		}
 	}
@@ -252,10 +239,12 @@ class template
 		<meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<meta http-equiv="Cache-control" content="public">
 		<meta charset="UTF-8">
+		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 		<?php
 		
 		if(!empty($function)){$this->$function(); $this->loadBar();}
 ?>
+	
 		</head>	
 		<body>
 		<?php $this->styles(); 
@@ -277,6 +266,12 @@ class template
 		</div>
 		<?php if($this->isMobile()){ include "header.php"; } ?>
 		</div>
+		<script src="javascript/jquery.lazyload.js"></script>
+		<script type="text/javascript" charset="utf-8">
+		$(function() {
+			$("img.lazy").lazyload({  effect : "fadeIn", container: $("#main")});
+		});
+		</script>
 		</body>
 		</html>
 	<?php
@@ -306,8 +301,8 @@ class template
 	function videojsScripts()
 	{
 	?>
-		<link href="http://vjs.zencdn.net/4.10/video-js.css" rel="stylesheet">
-		<script src="http://vjs.zencdn.net/4.10/video.js"></script>
+		<link href="//vjs.zencdn.net/4.5/video-js.css" rel="stylesheet">
+	<script src="//vjs.zencdn.net/4.5/video.js"></script>
 		<style type="text/css">
 		.vjs-default-skin .vjs-play-progress,
 		.vjs-default-skin .vjs-volume-level { background-color: #ff0000 }
@@ -316,7 +311,7 @@ class template
 		</style>
 	<?php
 	}
-	function videojs($videoname, $width, $height)
+	function videojs($videoname, $width, $height, $type, $length = "", $meta = "")
 	{
 		if($this->isMobile())
 		{
@@ -324,11 +319,51 @@ class template
 			//$height = $height/2;
 		}
 		?>
-		<video id="MY_VIDEO_1" class="video-js vjs-default-skin vjs-big-play-centered"  controls preload="false"
-		width="<?php print $width; ?>" height="<?php print $height; ?>"
-		data-setup="{}">
-		<source src="<?php print $videoname; ?>" type='video/mp4'>
-		<p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
+		<video id="MY_VIDEO_1" class="video-js vjs-default-skin vjs-big-play-centered"  controls width="<?php print $width; ?>" height="<?php print $height; ?>">
+		
+		<?php
+		if(!empty($length))
+		{
+		?>
+		<script>
+		var video= videojs('MY_VIDEO_1');
+		video.src("<?php print $videoname; ?>");
+		// hack duration
+		video.duration= function() { return video.theDuration; };
+		video.start= 0;
+		video.oldCurrentTime= video.currentTime;
+		video.currentTime= function(time) 
+		{ 
+			if( time == undefined )
+			{
+				return video.oldCurrentTime() + video.start;
+			}
+			console.log(time)
+			video.start= time;
+			video.oldCurrentTime(0);
+			video.src("<?php print $videoname; ?>&time=" + time);
+			video.play();
+			return this;
+		};
+	
+		$.getJSON( "<?php print $meta; ?>", function( data ) 
+		{
+			video.theDuration= data.duration;
+		});
+	</script>
+		<?php
+		}
+		else
+		{
+		?>
+		<script>
+		var video= videojs('MY_VIDEO_1');
+		video.src("<?php print $videoname; ?>");
+		</script>
+		<?php
+		}
+		?>
+		
 		</video>
 		<?php
 	}

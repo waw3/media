@@ -83,7 +83,7 @@ p
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
-	overflow-y: -moz-scrollbars-none;
+	overflow-y: auto;
 }
 #center
 {
@@ -304,6 +304,29 @@ ul li:hover
 	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	bottom: 0;
 }
+/* Let's get this party started */
+::-webkit-scrollbar {
+    width: 8px;
+	height: 8px;
+}
+ 
+/* Track */
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background: #999999; 
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+}
+::-webkit-scrollbar-thumb:window-inactive {
+	background: #999999; 
+}
 #recentlyAddedWrapper
 {
     max-width:95%;
@@ -314,7 +337,7 @@ ul li:hover
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
-	overflow-x: -moz-scrollbars-none;
+	overflow-x: auto;
 }
 #recentlyAddedWrapper2
 {
