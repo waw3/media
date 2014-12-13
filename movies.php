@@ -47,7 +47,7 @@ if($get) //loads the videoplayer if $get is true.
 	{
 		
 		$type = "mp4";
-		$length = shell_exec("/usr/local/bin/ffmpeg -i $dir 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
+		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
 		$length = explode(":",$length);
 		$length = $length[0]*3600 + $length[1]*60 + $length[2];
 		$f = fopen("metadata/".basename($dir).".js", 'w');;
@@ -61,7 +61,8 @@ if($get) //loads the videoplayer if $get is true.
 	if($template->isMobile())
 	{
 		echo '<center>'.PHP_EOL;
-		$template->videojs($dir, 320,180, $type);
+		if(!empty($length)){ $template->videojs($dir, 320, 180, $type, $length, $meta); }
+		else { $template->videojs($dir, 320, 180, $type); }
 		echo '</center>'.PHP_EOL;
 	}
 	else

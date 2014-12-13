@@ -324,11 +324,14 @@ class template
 		<?php
 		if(!empty($length))
 		{
+		
 		?>
 		<script>
 		var video= videojs('MY_VIDEO_1');
+				
 		video.src("<?php print $videoname; ?>");
 		// hack duration
+
 		video.duration= function() { return video.theDuration; };
 		video.start= 0;
 		video.oldCurrentTime= video.currentTime;
@@ -341,15 +344,13 @@ class template
 			console.log(time)
 			video.start= time;
 			video.oldCurrentTime(0);
-			video.src("<?php print $videoname; ?>&time=" + time);
+			video.src("<?php print $videoname; ?>&time=" + Math.trunc(time));
 			video.play();
 			return this;
 		};
 	
-		$.getJSON( "<?php print $meta; ?>", function( data ) 
-		{
-			video.theDuration= data.duration;
-		});
+
+			video.theDuration= <?php print $length; ?>;
 	</script>
 		<?php
 		}
@@ -386,6 +387,47 @@ class template
 			$random_string .= $random_char;
 		}
 		return $random_string;
+	}
+	function getBrowser() 
+	{ 
+    $u_agent = $_SERVER['HTTP_USER_AGENT']; 
+    $bname = 'Unknown';
+    $platform = 'Unknown';
+    $version= "";
+	$ub = "";
+    
+    // Next get the name of the useragent yes seperately and for good reason
+    if(preg_match('/MSIE/i',$u_agent) && !preg_match('/Opera/i',$u_agent)) 
+    { 
+        $bname = 'Internet Explorer'; 
+        $ub = "MSIE"; 
+    } 
+    elseif(preg_match('/Firefox/i',$u_agent)) 
+    { 
+        $bname = 'Mozilla Firefox'; 
+        $ub = "Firefox"; 
+    } 
+    elseif(preg_match('/Chrome/i',$u_agent)) 
+    { 
+        $bname = 'Google Chrome'; 
+        $ub = "Chrome"; 
+    } 
+    elseif(preg_match('/Safari/i',$u_agent)) 
+    { 
+        $bname = 'Apple Safari'; 
+        $ub = "Safari"; 
+    } 
+    elseif(preg_match('/Opera/i',$u_agent)) 
+    { 
+        $bname = 'Opera'; 
+        $ub = "Opera"; 
+    } 
+    elseif(preg_match('/Netscape/i',$u_agent)) 
+    { 
+        $bname = 'Netscape'; 
+        $ub = "Netscape"; 
+    }
+	return $ub;
 	}
 }
 ?>
