@@ -311,7 +311,7 @@ class template
 		</style>
 	<?php
 	}
-	function videojs($videoname, $width, $height, $type, $length = "", $meta = "")
+	function videojs($videoname, $width, $height, $type, $length = "")
 	{
 		if($this->isMobile())
 		{
@@ -329,10 +329,11 @@ class template
 		<script>
 		var video= videojs('MY_VIDEO_1');
 				
-		video.src("<?php print $videoname; ?>");
+		video.src("<?php print $videoname."&quality=Low&time=0"; ?>");
 		// hack duration
 
 		video.duration= function() { return video.theDuration; };
+		
 		video.start= 0;
 		video.oldCurrentTime= video.currentTime;
 		video.currentTime= function(time) 
@@ -344,12 +345,10 @@ class template
 			console.log(time)
 			video.start= time;
 			video.oldCurrentTime(0);
-			video.src("<?php print $videoname; ?>&time=" + Math.trunc(time));
+			video.src("<?php print $videoname."&quality=Low&time=" ?>" + Math.trunc(time));
 			video.play();
 			return this;
 		};
-	
-
 			video.theDuration= <?php print $length; ?>;
 	</script>
 		<?php
@@ -360,6 +359,7 @@ class template
 		<script>
 		var video= videojs('MY_VIDEO_1');
 		video.src("<?php print $videoname; ?>");
+		video.currentTime(0);
 		</script>
 		<?php
 		}

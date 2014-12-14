@@ -1,4 +1,5 @@
 <?php
+if($_SERVER['SERVER_PORT'] == '443') { header('Location: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); exit(); }
 require "template.php"; 
 $template = new template();
 $template->startSessionRestricted();
@@ -13,7 +14,7 @@ if(isset($_POST['searchtext'])) //Sombody is searching for a movie so we are gio
 
 if(isset($_GET["movie"])) //The GET variable is set so someone is probably trying to watch a movie
 {
-	if($_SERVER['SERVER_PORT'] == '443') { header('Location: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); exit(); }
+	
 	$type = substr($_GET['movie'],strlen($_GET['movie'])-3);
 	$plainTextMovieName = substr($_GET['movie'],0,strlen($_GET['movie'])-4);
 	$movieinfo = file_get_contents("metadata/".$plainTextMovieName.".txt");
@@ -37,27 +38,32 @@ if($get) //loads the videoplayer if $get is true.
 	$tTranscode = false;
 	$template->videojsScripts();
 	$vCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 | grep h264 | grep Stream | wc -l");
+	
 	$aCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 | grep aac | grep Stream | wc -l");
 	if($vCount != 1){ $vTranscode = true; }
 	if($aCount != 1){ $aTranscode = true; }
-		if($type == "mkv") { $type = "mp4"; }
+	if($type == "mkv") { $type = "mp4"; }
 	if($type != "mp4") { $tTranscode = true; }
 	$length = "";
-	if($vTranscode || $aTranscode || $tTranscode)
+	if($vTranscode)
 	{
 		
 		$type = "mp4";
 		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
 		$length = explode(":",$length);
 		$length = $length[0]*3600 + $length[1]*60 + $length[2];
-		$f = fopen("metadata/".basename($dir).".js", 'w');;
-		$json = array('duration' => $length);
-		fwrite($f,json_encode($json));
-		$meta = "metadata/".basename($dir).".js";
-		fclose($f);
 		$dir = "transcode.php?movie=".basename($dir);
 		
 	}
+	else if($aTranscode)
+	{
+		$type = "mp4";
+		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
+		$length = explode(":",$length);
+		$length = $length[0]*3600 + $length[1]*60 + $length[2];
+		$dir = "transcode.php?movie=".basename($dir);
+	}
+	
 	if($template->isMobile())
 	{
 		echo '<center>'.PHP_EOL;
@@ -74,7 +80,7 @@ if($get) //loads the videoplayer if $get is true.
 		$height = 360;
 		$width = 640;
 		if($template->isMobile()) { $height = 180; $width = 320; }
-		if(!empty($length)){ $template->videojs($dir, $width, $height, $type, $length, $meta); }
+		if(!empty($length)){ $template->videojs($dir, $width, $height, $type, $length); }
 		else { $template->videojs($dir, $width, $height, $type); }
 		echo '<p style="text-align: left;text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$moviePlot.'</p>'.PHP_EOL;
 		echo '</div>'.PHP_EOL;
