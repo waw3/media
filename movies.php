@@ -94,45 +94,52 @@ if($get) //loads the videoplayer if $get is true.
 	}
 } 		
 else // if get is false then we load the movie list.
-{
-	$filesAdded = file_get_contents("Logs/addedContent.log");
-	$filesAdded = explode("\n",$filesAdded);
-	$count = 1;
-	$recentlyAddedContent = array();
-	for($i = count($filesAdded)-1; $i >= 0; $i--)
+{	
+	if(empty($_POST['searchtext']))
 	{
-		if(!empty($filesAdded[$i]))
+		if(file_exists("Logs/addedContent.log"))
 		{
-			array_push($recentlyAddedContent,$filesAdded[$i]);
-			if($count == 15){ break;}
-			$count +=1;
+			$filesAdded = file_get_contents("Logs/addedContent.log");
+			$filesAdded = explode("\n",$filesAdded);
+			$count = 1;
+			$recentlyAddedContent = array();
+			for($i = count($filesAdded)-1; $i >= 0; $i--)
+			{
+				if(!empty($filesAdded[$i]))
+				{
+					array_push($recentlyAddedContent,$filesAdded[$i]);
+					if($count == 15){ break;}
+					$count +=1;
+				}
+			}
+			// We shall load the recently added content first.
+			echo '<h1>Recently Added</h1>'.PHP_EOL;
+			echo '<div id="recentlyAddedWrapper" >'.PHP_EOL;
+			foreach($recentlyAddedContent as $value) //Loop through all the movies detected in the addedContent file.
+			{ 
+				$getvalue = urlencode($value);
+				$movies = file_get_contents("metadata/".substr($value,0,strlen($value)-4).".txt");
+				$movies = explode("\n",$movies);
+				$title = substr($movies[1],0,strpos($movies[1],"("));
+				$title2 = substr($value,0,strlen($value)-4);
+				if(strlen($title) > 17) { $title = substr($title,0,17) . "..."; }
+				if($movies == "No information") { $movies = $title2; }
+				echo '<div id="moviePosterContainer" style="margin-top: 10px;" onclick=\'javascript:location.href="/media/movies.php?movie='.$getvalue.'"\'>'.PHP_EOL;
+				echo '<label style="cursor:pointer; text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$title.'</label><br>'.PHP_EOL;
+				if(file_exists("metadata/$title2.jpeg"))
+				{
+					echo '<img  id="posters" alt="'.$title2.'" src="'."metadata/$title2".'.jpeg" width="'.$width.'" height="'.$height.'">'.PHP_EOL;
+				}
+				else 
+				{
+					echo '<img  id="posters" alt="'.$title2.'" src="'."images/movie".'.jpeg" width="'.$width.'" height="'.$height.'"\'>'; 
+				}
+				echo '</div>'.PHP_EOL;
+			}
+		
+			echo '</div>'.PHP_EOL;		
 		}
 	}
-	// We shall load the recently added content first.
-	echo '<h1>Recently Added</h1>'.PHP_EOL;
-	echo '<div id="recentlyAddedWrapper" >'.PHP_EOL;
-	foreach($recentlyAddedContent as $value) //Loop through all the movies detected in the addedContent file.
-	{ 
-		$getvalue = urlencode($value);
-		$movies = file_get_contents("metadata/".substr($value,0,strlen($value)-4).".txt");
-		$movies = explode("\n",$movies);
-		$title = substr($movies[1],0,strpos($movies[1],"("));
-		$title2 = substr($value,0,strlen($value)-4);
-		if(strlen($title) > 17) { $title = substr($title,0,17) . "..."; }
-		if($movies == "No information") { $movies = $title2; }
-		echo '<div id="moviePosterContainer" style="margin-top: 10px;" onclick=\'javascript:location.href="/media/movies.php?movie='.$getvalue.'"\'>'.PHP_EOL;
-		echo '<label style="cursor:pointer; text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$title.'</label><br>'.PHP_EOL;
-		if(file_exists("metadata/$title2.jpeg"))
-		{
-			echo '<img  id="posters" alt="'.$title2.'" src="'."metadata/$title2".'.jpeg" width="'.$width.'" height="'.$height.'">'.PHP_EOL;
-		}
-		else 
-		{
-			echo '<img  id="posters" alt="'.$title2.'" src="'."images/movie".'.jpeg" width="'.$width.'" height="'.$height.'"\'>'; 
-		}
-		echo '</div>'.PHP_EOL;
-	}
-	echo '</div>'.PHP_EOL;	
 	echo '<h1>Movies('.count($files).')</h1>'.PHP_EOL;	
 	echo '<div id="movieWrapper" style="text-align: center;">'.PHP_EOL;				 
 	foreach($files as $value) 

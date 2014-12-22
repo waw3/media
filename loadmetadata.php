@@ -102,9 +102,9 @@ function metadata($num)
 		}
 		
 	}
+	fclose($f);
 	$lines = file('Logs/addedContent.log');
 	$lines = array_unique($lines);
 	file_put_contents('Logs/addedContent.log', implode($lines));
-	fclose($f);
 }
 ?>

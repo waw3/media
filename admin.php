@@ -15,11 +15,11 @@ $sql="SELECT username FROM users WHERE username = '$user'";
 		{
 			$username = $row[0];
 
-			if($_POST['status'] == "activate")
+			if($_POST['status'] == "Activate")
 			{
 				$query="UPDATE users SET activated = 1 WHERE username = '$username';";
 			}
-			elseif($_POST['status'] == "ban")
+			elseif($_POST['status'] == "Ban")
 			{
 				$query="UPDATE users SET activated = 2 WHERE username = '$username';";
 			}
@@ -49,26 +49,36 @@ if($result = mysqli_query($con,$sql))
 	}
 }
 ?>
-<div id = "contentWrapper">
-	<form action="admin.php?edit=<?php print $username; ?>" method="post" enctype="multipart/form-data" style="margin-left: 25px; width: 300px;" >
-		<p style="text-align: left;">First Name: <?php print $firstname; ?></p>
-		<p style="text-align: left;">Last Name: <?php print $lastname; ?></p>
-		<p style="text-align: left;" >Username: <?php print $username; ?></p>
-		<p style="text-align: left;">Registration Date: <?php print $dateCreated[0]; ?></p>
+<h1>Edit User</h1>
+<center>
+<div class="tableDiv">
+<form action="" method="post" enctype="multipart/form-data">
+	<table style="margin-top: 50px; min-width: 400px; table-layout: fixed;">
+	<tr></tr>
+	<tr><td>First Name: </td><td><?php print $firstname; ?></td><td><input type="text" name="fname"></td></tr>
+	<tr><td>Last Name: </td><td><?php print $lastname; ?></td><td><input type="text" name="lname"></td></tr>
+	<tr><td>Username: </td><td><?php print $username; ?></td><td><input type="text" name="uname"></td></tr>
+	<tr><td>Registration Date: </th><td><?php print $dateCreated[0]; ?></td><td></td></tr>
+
 		<?php if($status == 0) 
 		{ 
-			$value = "activate";
+			$value = "Activate";
+			$label = "Inactive";
 		}
 		elseif($status == 1)
 		{
-			$value = "ban";
+			$value = 'Ban';
+			$label = '<font style="color: #66FF33">Active</font>';
 		}
 		else
 		{
-			$value = "unban";
+			$value = "Unban";
+			$label = '<font style="color: red">Banned</font>';
 		}
 		?>
-		<p style="float: left; padding: 0px"><input id="button" style="margin-left: 0px;" type="submit" name="status" value="<?php print $value; ?>"></p>
+		<tr><td>Status: </td><td><?php print $label; ?></td><td><input id="button" style="background: none;" type="submit" name="status" value="<?php print $value; ?>"></td></tr>
+	</center>
+	</table>
 	</form>
 	</div>
 <?php
@@ -108,7 +118,7 @@ $sql="SELECT ID, username, firstname, lastname, regdate, userGroup , activated F
 			}
 			
 			print "<tr>";
-			print "<td>$id</td> <td>$username</td> <td>$firstname</td> <td>$lastname</td> <td>$dateCreated</td><td>$userGroup</td><td>$status</td><td><button type=\"button\" id=\"button\" style=\"background: none; onclick=\"javascript:location.href='admin.php?edit=$username'\">Edit</button></td>";
+			print "<td>$id</td> <td>$username</td> <td>$firstname</td> <td>$lastname</td> <td>$dateCreated</td><td>$userGroup</td><td>$status</td><td><button type=\"button\" id=\"button\" style=\"background: none;\" onclick=\"javascript:location.href='admin.php?edit=$username'\">Edit</button></td>";
 			print "</tr>\n";
 			
 		}

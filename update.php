@@ -29,7 +29,7 @@ if($count2 < 2)
 {
 	exec('/usr/local/bin/php -r "require \'removemetadata.php\'; metadata();" > /dev/null &');
 }
-$template->createPage("Simple Media Streamer", "customScrollLazyLoad");
+$template->createPage("Simple Media Streamer");
 $unmatched = 0;
 $matched = 0;
 print '<div style="margin-left: 0;width: 500px;">'.PHP_EOL;
