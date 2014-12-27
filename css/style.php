@@ -148,6 +148,7 @@ p
 }
 #submit
 {
+	background-color: transparent;
 	background-color: #101010;
 	font: bold 12px/18px sans-serif;
 	margin-left: 5px;
@@ -274,31 +275,39 @@ ul li:hover
 }
 #moviePosterContainer
 {
+    z-index: 200;
+	background-position: center;
+	background-repeat: no-repeat;
 	display: inline-block;
 	height: 260px;
-	width: 168px;
-	margin-bottom: 10px;
+	width: 163px;
 	text-align: center;
-	margin-right:7px;
-	margin-left: 7px;
 	white-space:nowrap;
 	overflow: hidden;
 	vertical-align: top;
+	max-width: 100%;
 }
 #moviePosterContainer:hover
 {
 	cursor:pointer;
-	background-color: #202020;
-	-moz-box-shadow: 0 0 5px 5px #FFFFFF;
-	-webkit-box-shadow: 0 0 5px 5px #FFFFFF;
-	box-shadow: 0 0 5px 5px #FFFFFF;
 }
-
+#moviePosterContainer:hover #movieInfo
+{
+	visibility: visible;
+	display: initial;
+}
+#movieInfo
+{
+	visibility: hidden;
+	display: none;
+}
 #posters
 {
+	background-color: #000000;
+	position: relative;
 	width: 150px;
 	height: 222px;
-	margin-top: 5px;
+	margin-top: 4px;
 	-webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	-moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
@@ -330,7 +339,7 @@ ul li:hover
 #recentlyAddedWrapper
 {
     max-width:95%;
-    height:300px;
+    height:275px;
     margin: 0 auto;
 	white-space: nowrap;
 	background-color: #303030;
@@ -342,7 +351,7 @@ ul li:hover
 #recentlyAddedWrapper2
 {
     max-width:95%;
-    height:300px;
+    height:325px;
     margin: 0 auto;
 	white-space: nowrap;
 	background-color: #303030;

@@ -1,17 +1,23 @@
 <?php
-if($_SERVER['SERVER_PORT'] != '443') { header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); exit(); }
+if($_SERVER['SERVER_PORT'] != '443') 
+{
+	header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+	exit();
+}
 require "template.php"; 
 $template = new template();
 $template->createPage("Register", false);
 $msg = "";
 if($_POST['username'])
 {
-	$msg = $template->register($_POST["fName"], $_POST["lName"], $_POST["username"], $_POST["password"], $_POST["cPassword"], $_SERVER['REMOTE_ADDR']);
+	$msg = $template->register($_POST["fName"], $_POST["lName"],
+	$_POST["username"], $_POST["password"], $_POST["cPassword"],
+	$_SERVER['REMOTE_ADDR']);
 }
 ?>
 	<h1>Register</h1>
 	<center>
-	<form action="register.php" method="post" enctype="multipart/form-data" style="width: 375px;">
+	<form action="register.php" method="post" style="width: 375px;">
 		<p>First Name: <input  type="text" name="fName" required/></p>
 		<p>Last Name: <input type="text" name="lName" required/></p>
 		<p>Username: <input type="text" name="username" required/></p>

@@ -115,6 +115,8 @@ else // if get is false then we load the movie list.
 			// We shall load the recently added content first.
 			echo '<h1>Recently Added</h1>'.PHP_EOL;
 			echo '<div id="recentlyAddedWrapper" >'.PHP_EOL;
+			$width = 180;
+			$height = 266;
 			foreach($recentlyAddedContent as $value) //Loop through all the movies detected in the addedContent file.
 			{ 
 				$getvalue = urlencode($value);
@@ -124,15 +126,15 @@ else // if get is false then we load the movie list.
 				$title2 = substr($value,0,strlen($value)-4);
 				if(strlen($title) > 17) { $title = substr($title,0,17) . "..."; }
 				if($movies == "No information") { $movies = $title2; }
-				echo '<div id="moviePosterContainer" style="margin-top: 10px;" onclick=\'javascript:location.href="/media/movies.php?movie='.$getvalue.'"\'>'.PHP_EOL;
+				echo '<div id="moviePosterContainer" style="margin-top: 5px;" onclick=\'javascript:location.href="/media/movies.php?movie='.$getvalue.'"\'>'.PHP_EOL;
 				echo '<label style="cursor:pointer; text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$title.'</label><br>'.PHP_EOL;
 				if(file_exists("metadata/$title2.jpeg"))
 				{
-					echo '<img  id="posters" alt="'.$title2.'" src="'."metadata/$title2".'.jpeg" width="'.$width.'" height="'.$height.'">'.PHP_EOL;
+					echo '<img  id="posters"  alt="'.$title2.'" src="'."metadata/$title2".'.jpeg" >'.PHP_EOL;
 				}
 				else 
 				{
-					echo '<img  id="posters" alt="'.$title2.'" src="'."images/movie".'.jpeg" width="'.$width.'" height="'.$height.'"\'>'; 
+					echo '<img  id="posters" alt="'.$title2.'" src="'."images/movie".'.jpeg" >'; 
 				}
 				echo '</div>'.PHP_EOL;
 			}
@@ -163,11 +165,11 @@ else // if get is false then we load the movie list.
 		echo '<label style="cursor:pointer; text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$title.'</label><br>'.PHP_EOL;
 		if(file_exists("metadata/$title2.jpeg"))
 		{
-			echo '<img class="lazy img-responsive" id="posters" alt="'.$title2.'" src="images/holder.jpg" data-original="'."metadata/$title2".'.jpeg" width="'.$width.'" height="'.$height.'">'.PHP_EOL;
+			echo '<img class="lazy img-responsive" id="posters" alt="'.$title2.'" src="images/holder.jpg" data-original="'."metadata/$title2".'.jpeg" >'.PHP_EOL;
 		}
 		else
 		{
-			echo '<img class="lazy img-responsive" id="posters" alt="'.$title2.'" src="images/holder.jpg" data-original="'."images/movie".'.jpeg" width="'.$width.'" height="'.$height.'"\'>';
+			echo '<img class="lazy img-responsive" id="posters" alt="'.$title2.'" src="images/holder.jpg" data-original="'."images/movie".'.jpeg" >';
 		}
 		echo '</div>'.PHP_EOL;
 	}

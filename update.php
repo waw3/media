@@ -27,7 +27,7 @@ if($count < 2)
 $count2 = shell_exec('pgrep -f removemetadata | wc -l');
 if($count2 < 2)
 {
-	exec('/usr/local/bin/php -r "require \'removemetadata.php\'; metadata();" > /dev/null &');
+	//exec('/usr/local/bin/php -r "require \'removemetadata.php\'; metadata();" > /dev/null &');
 }
 $template->createPage("Simple Media Streamer");
 $unmatched = 0;

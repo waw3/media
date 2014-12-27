@@ -29,7 +29,7 @@ if(file_exists("Logs/addedContent.log"))
 			$title2 = $title;
 			if(strlen($title) > 17) { $title = substr($title,0,17) . "..."; }
 			if($movies == "No information") { $movies = $title2; }
-			echo '<div id="moviePosterContainer" style="margin-top: 10px;" onclick=\'javascript:location.href="/media/movies.php?movie='.$getvalue.'"\'>'.PHP_EOL;
+			echo '<div id="moviePosterContainer" style="margin-top: 5px;" onclick=\'javascript:location.href="/media/movies.php?movie='.$getvalue.'"\'>'.PHP_EOL;
 			echo '<label style="cursor:pointer; text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$title.'</label><br>'.PHP_EOL;
 			if(file_exists("metadata/$title2.jpeg"))
 			{

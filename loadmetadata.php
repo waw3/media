@@ -58,7 +58,7 @@ function metadata($num)
 					//We got this far so that means there is new content.
 					file_put_contents("metadata/$name".".jpeg",file_get_contents($results->Poster));
 					$file = str_replace(" ","\ ", $name.".jpeg");
-					shell_exec("/usr/local/bin/convert -size 300x444 metadata/$file -resize 150x222 metadata/$file 2>&1");
+					shell_exec("/usr/local/bin/convert -size 300x444 metadata/$file -resize 180x266 metadata/$file 2>&1");
 				}
 				// If there is no poster, don't give up hope lets try another database!
 				else
@@ -72,6 +72,8 @@ function metadata($num)
 						$path = $results->results[0]->poster_path;
 						$image = "http://image.tmdb.org/t/p/w150/$path";
 						file_put_contents("metadata/$name".".jpeg",file_get_contents($image));
+						$file = str_replace(" ","\ ", $name.".jpeg");
+						shell_exec("/usr/local/bin/convert -size 300x444 metadata/$file -resize 180x266 metadata/$file 2>&1");
 					}	
 				}
 			}
@@ -92,6 +94,8 @@ function metadata($num)
 					$path = $results->results[0]->poster_path;
 					$image = "http://image.tmdb.org/t/p/w150/$path";
 					file_put_contents("metadata/$name".".jpeg",file_get_contents($image));
+					$file = str_replace(" ","\ ", $name.".jpeg");
+					shell_exec("/usr/local/bin/convert -size 300x444 metadata/$file -resize 180x266 metadata/$file 2>&1");
 				}	
 			}
 			if($newContent)

@@ -11,38 +11,77 @@ class template
 	{
 		$dbUser=file_get_contents("config/databaseUser.txt");
 		$dbUser=explode("\n",$dbUser);
-		$con=mysqli_connect("localhost","$dbUser[0]","$dbUser[1]","$dbUser[2]");
+		try {
+		$con = new PDO("mysql:host=localhost;dbname=$dbUser[2]",
+		"$dbUser[0]","$dbUser[1]");
+		$con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		}catch(PDOException $e){
+			echo $e->getMessage();
+			exit();
+		}
 		return $con;
+	}
+	public function changePassword($username, $nPass, $cPass, $oPass)
+	{
+		$con=$this->dbConnect();
+		if($nPass == $cPass)
+		{
+			if(empty($nPass) || empty($cPass) || empty($oPass))
+			{ 
+			return "<h2>Password can't be empty</h2>"; }
+			if(strlen($nPass) < 6)
+			{ 
+				return "<h2>Password has to be at least 6 characters</h2>"; 
+			}
+			$sql = "SELECT password from users WHERE username = ?";
+			$query = $con->prepare($sql);
+			$query->execute(array($username));
+			$row = $query->fetch(PDO::FETCH_ASSOC);
+
+			if(password_verify($oPass,$row['password']))
+			{
+				if(password_verify($nPass,$row['password']))
+				{
+					return "<h2>That's your current password.</h2>";
+				}
+				$nPass = password_hash($nPass, PASSWORD_DEFAULT);
+				$sql = "UPDATE users SET password = ? WHERE username = ?";
+				$query = $con->prepare($sql);
+				$query->execute(array($nPass, $username));
+				$con = null;
+			}
+			else { $con = null; return "<h2>Old password invalid.</h2>"; }
+		}
+		else { return "<h2>Passwords do not match.</h2>"; }
+		mysqli_close($con);
+		return "<h3>Password was successfully changed.</h3>";
 	}
 	public function login($suppliedUser, $suppliedPass)
 	{
-			session_start();
 			$con=$this->dbConnect();
-			$suppliedUser=mysqli_real_escape_string($con, $suppliedUser);
-			$suppliedPass=mysqli_real_escape_string($con, $suppliedPass);
 			//sql query to get the information from the database
 			$sql="SELECT id, username, password, userGroup,". 
-			" activated FROM users WHERE username='$suppliedUser' LIMIT 1;"; 
-			$query=mysqli_query($con, $sql);
-			$row=mysqli_fetch_row($query);
-			//closing database connection.
-			mysqli_close($con); 
-			if($row[4] == 0){
+			" activated FROM users WHERE username = ? LIMIT 1;"; 
+			$query = $con->prepare($sql);
+			$query->execute(array($suppliedUser));
+			$row = $query->fetch(PDO::FETCH_ASSOC);
+
+			if($row['activated'] == 0){
 				return "<h2>Account isn't active.</h2>";
 			}
-			elseif($row[4] == 2)
+			elseif($row['activated'] == 2)
 			{
 				return "<h2>Account has been banned.</h2>";
 			}
 			//checking if the password matches.
-			if(password_verify($suppliedPass,$row[2])) 
+			if(password_verify($suppliedPass,$row['password'])) 
 			{
+				session_start();
 				$root=$this->cwd();
 				//setting session variables.
-				$_SESSION['username']=$row[1];
+				$_SESSION['username']=$row['username'];
 				$_SESSION['activity']=time();
-				$_SESSION['group']=$row[3];
-				$_SESSION['transcode']="";
+				$_SESSION['group']=$row['userGroup'];
 				header("Location: $root ");
 			} 
 			else
@@ -82,113 +121,66 @@ class template
 	public function register($fName, $lName, $user, $pass, $cPass, $ip)
 	{
 		$con=$this->dbConnect();
-		$fName=mysqli_real_escape_string($con, strip_tags($fName));
-		$lName=mysqli_real_escape_string($con, strip_tags($lName));
-		$user=mysqli_real_escape_string($con, strip_tags($user));
 		$user=strtolower($user);
-		$pass=mysqli_real_escape_string($con, strip_tags($pass));
-		$cPass=mysqli_real_escape_string($con, strip_tags($cPass));
-		$ip=mysqli_real_escape_string($con, strip_tags($ip));
 		if(preg_match('/\s/',$fName) 
 		|| preg_match('/\s/',$lName) 
 		|| preg_match('/\s/',$user) 
 		|| preg_match('/\s/',$pass) 
-		|| preg_match('/\s/',$cPass))
+		|| preg_match('/\s/',$cPass)){return "<h2>No spaces allowed.</h2>";}
+		
+		//All of these if statements just check the registration info.
+		if($pass != $cPass) { return "<h2>Passwords do not match</h2>"; }
+				
+		if(strlen($fName) > 30 || strlen($lName) > 30)
 		{
-			$msg="<h2>No spaces allowed.</h2>";
+			return "<h2>Names cannot be longer than 30 characters.</h2>";
 		}
-		else
+		else if(strlen($fName) < 3 || strlen($lName) < 3)
 		{
-			//All of these if statements just check the registration info.
-			if($pass == $cPass) 
-			{
-				if(strlen($fName) > 30 || strlen($lName) > 30)
-				{
-					$msg="<h2>Names cannot be longer than 30 characters.</h2>";
-				}
-				else if(strlen($fName) < 3 || strlen($lName) < 3)
-				{
-					$msg="<h2>Names cannot be less than 3 characters.</h2>";
-				}
-				elseif(strlen($user) > 20)
-				{
-					$msg="<h2>Usernames cannot be ".
-					"longer than 20 characters.</h2>";
-				}
-				elseif(strlen($user) < 3)
-				{
-					$msg="<h2>Usernames cannot be ".
-					"shorter than 3 characters.</h2>";
-				}
-				elseif(strlen($pass)>55)
-				{
-					$msg="<h2>Password cannot be ".
-					"longer than 55 characters.</h2>";
-				}
-				elseif(strlen($pass)<6)
-				{
-					$msg="<h2>Password cannot be ".
-					"shorter than 6 characters.</h2>";
-				}
-				else
-				{
-					$sql="SELECT username FROM users WHERE username='$user';";
-					$sql ="SELECT regdate, ip FROM users ".
-					"WHERE ip='$ip' ORDER BY id DESC";
-					$result=mysqli_query($con, $sql);
-					$result2=mysqli_query($con, $sql2);
-					$count2=mysqli_num_rows($result2);
-					$count=mysqli_num_rows($result);
-					$row=mysqli_fetch_row($result2);
-					if($count != 0)
-					{
-						$msg="<h2>Username has been taken</h2>";
-					}
-					else
-					{
-						if($count2 < 5)
-						{
-							$pass=password_hash($pass,PASSWORD_DEFAULT);
-							mysqli_query($con,"INSERT INTO users ".
-							"(username,password,firstname,lastname, ".
-							"regdate, ip, userGroup, activated) VALUES ".
-							"('$user', '$pass', '$fName', '$lName', now(), ".
-							"'$ip','standard', '0')");
-							$msg="<h3>Your account has been created. ".
-							"However, the administrator has to activate ".
-							"the account.</h3>";
-						}
-						else
-						{
-							$hours=$this->compareDate($row[0]);
-							if($hours >= 24)
-							{
-								$pass=password_hash($pass,PASSWORD_DEFAULT);
-								mysqli_query($con,"INSERT INTO users ".
-								"(username,password,firstname,lastname,regdate, ip) VALUES ".
-								"('$user', '$pass', '$fName', '$lName', now(), ".
-								"'$ip','standard', '0')");
-								$msg="<h3>Your account has been created. ".
-								"However, the administrator has to activate ".
-								"the account.</h3>";
-							}
-							else
-							{
-								$msg="<h2>To many registrations with that ".
-									   "IP address Please try again in". 
-									   (24 - $hours). "hours <h2>";
-							}
-						}
-					}
-					mysqli_close($con);
-				}
-			}
-			else
-			{
-				$msg="<h2>Passwords do not match</h2>";
-			}
+			return "<h2>Names cannot be less than 3 characters.</h2>";
 		}
-		return $msg;
+		elseif(strlen($user) > 20)
+		{
+			return "<h2>Usernames cannot be ".
+			"longer than 20 characters.</h2>";
+		}
+		elseif(strlen($user) < 3)
+		{
+			return "<h2>Usernames cannot be ".
+			"shorter than 3 characters.</h2>";
+		}
+		elseif(strlen($pass)>55)
+		{
+			return "<h2>Password cannot be ".
+			"longer than 55 characters.</h2>";
+		}
+		elseif(strlen($pass)<6)
+		{
+			return "<h2>Password cannot be ".
+			"shorter than 6 characters.</h2>";
+		}
+
+		$sql="SELECT username FROM users WHERE username= ?;";
+		$query = $con->prepare($sql);
+		$query->execute(array($user));
+		$row=$query->fetch();
+		if(!empty($row))
+		{
+			$con = null;
+			return "<h2>Username has been taken</h2>";
+		}
+		$pass=password_hash($pass,PASSWORD_DEFAULT);
+		$sql = "INSERT INTO users ".
+		"(username,password,firstname,lastname, ".
+		"regdate, ip, userGroup, activated) VALUES ".
+		"(?, ?, ?, ?, now(), ".
+		"?,'standard', '0')";
+		$query = $con->prepare($sql);
+		$query->execute(array($user, $pass, $fName, $lName, $ip));
+		$con = null;
+		return "<h3>Your account has been created. ".
+		"However, the administrator has to activate ".
+		"the account.</h3>";
 	}
 	// use if site should be restricted to registered users.
 	public function startSessionRestricted() 
@@ -208,14 +200,15 @@ class template
 		}
 		else
 		{
+			//This runs to check if the user has been banned.
 			$username=$_SESSION['username'];
 			$con=$this->dbConnect();
 			//sql query to get the information from the database
 			$sql="SELECT activated FROM users WHERE ". 
 			"username='$username' LIMIT 1;"; 
-			$query=mysqli_query($con, $sql);
-			$row=mysqli_fetch_row($query);
-			if($row[0] == 2)
+			$query=$con->query($sql);
+			$row=$query->fetch(PDO::FETCH_ASSOC);
+			if($row['activated'] == 2)
 			{
 				unset($_SESSION);
 				session_destroy();
@@ -225,20 +218,15 @@ class template
 		}
 		if($_SESSION['group'] == "admin")
 		{
+			//This statement will check if there are any users to be activated.
 			$con=$this->dbConnect();
 			$sql="SELECT activated FROM users WHERE activated='0';";
-			$query=mysqli_query($con, $sql);
-			if(mysqli_num_rows($query) != 0)
+			$query=$con->query($sql);
+			$row=$query->fetch(PDO::FETCH_ASSOC);
+			if($query->rowCount() != 0)
 			{
 				$this->setClass('class="newUser"');
 			}
-		}
-		if(!empty($_SESSION['transcode']))
-		{
-			$name=$_SESSION['transcode'];
-			exec("pkill -f $name");
-			unlink("live/$name.mp4");
-			$_SESSION['transcode']="";
 		}
 }
 	public function getClass()
@@ -431,13 +419,13 @@ class template
 	{ 
 		$u_agent=$_SERVER['HTTP_USER_AGENT'];   
 		if(preg_match('/MSIE/i',$u_agent) && !preg_match('/Opera/i',$u_agent))
-		{ 
+		{
 			return "MSIE"; 
-		} 
-		elseif(preg_match('/Firefox/i',$u_agent)) { return "Firefox"; } 
-		elseif(preg_match('/Chrome/i',$u_agent)) { return "Chrome"; } 
-		elseif(preg_match('/Safari/i',$u_agent)) { return "Safari"; } 
-		elseif(preg_match('/Opera/i',$u_agent)) { return "Opera"; } 
+		}
+		elseif(preg_match('/Firefox/i',$u_agent)) { return "Firefox"; }
+		elseif(preg_match('/Chrome/i',$u_agent)) { return "Chrome"; }
+		elseif(preg_match('/Safari/i',$u_agent)) { return "Safari"; }
+		elseif(preg_match('/Opera/i',$u_agent)) { return "Opera"; }
 		elseif(preg_match('/Netscape/i',$u_agent)) { return "Netscape"; }
 	}
 }
