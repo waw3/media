@@ -13,45 +13,37 @@ $msg = "";
 if(!empty($_POST['status']))
 {
 
-$user = $_GET['edit'];
-$sql="SELECT id, username, userGroup FROM users WHERE username = '$user'";
-	if($result = mysqli_query($con,$sql))
+	$user = $_GET['edit'];
+	$sqlQuery = new sql("users", $template->dbConnect());
+	$query = $sqlQuery->select("id username userGroup","username",$user);
+	$row = $query->fetch(PDO::FETCH_ASSOC);
+	$username = $row['username'];
+	$group = $row['userGroup'];
+	$id = $row['id'];
+	if($group == "admin" || $id == 0) { $msg = "<h2>Cannot ban admin</h2>"; }
+	else
 	{
-		if($row = mysqli_fetch_row($result));
+		if($_POST['status'] == "Activate")
 		{
-			$username = $row[1];
-			$group = $row[2];
-			$id = $row[0];
-			if($group == "admin" || $id == 0) { $msg = "<h2>Cannot ban admin</h2>"; }
-			else
-			{
-				if($_POST['status'] == "Activate")
-				{
-					$query="UPDATE users SET activated = 1 WHERE username = '$username';";
-				}
-				elseif($_POST['status'] == "Ban")
-				{
-					$query="UPDATE users SET activated = 2 WHERE username = '$username';";
-				}
-				else
-				{
-					$query="UPDATE users SET activated = 1 WHERE username = '$username';";
-				}
-				mysqli_query($con,$query);
-			}
-			
+			$sqlQuery->update("activated","username","1 $username");
 		}
-	}
+		elseif($_POST['status'] == "Ban")
+		{
+			$sqlQuery->update("activated","username","2 $username");
+		}
+		else
+		{
+			$sqlQuery->update("activated","username","1 $username");
+		}		
+	}	
 }
 if(!empty($_GET['edit']))
 {
+$sqlQuery = new sql("users", $template->dbConnect());
 $username = $_GET['edit'];
-$sql="SELECT ID, username, firstname, lastname, regdate, userGroup,".
-" activated FROM users WHERE username = ?";
-$query = $con->prepare($sql);
-$query->execute(array($username));
+$query = $sqlQuery->select("ID username firstname lastname regdate".
+" userGroup activated","username",$username);
 $row = $query->fetch(PDO::FETCH_ASSOC);
-$con = null;
 if(!empty($row))
 {
 		$id = $row['ID'];
