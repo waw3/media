@@ -14,25 +14,22 @@ if($template->getBrowser() != "Firefox")
 	header('Content-Disposition: atteachment; filename="'.$rString.'.mkv"');
 	if(!empty($_GET['time'])){$time = $_GET['time'];}
 	else { $time = 0; }
-	$cmd = "/usr/local/bin/ffmpeg -ss $time";
+	$cmd = "/usr/local/bin/ffmpeg -ss $time -re ";
 	if($_GET['quality'] == "source")
 	{ 
-		$cmd = "/usr/local/bin/ffmpeg -ss $time -itsoffset 10";
+		$cmd = "/usr/local/bin/ffmpeg -ss $time -itsoffset 10 -re ";
 		$vcodec = "copy  ";
 	}
 	else if($_GET['quality'] == "High")
 	{
-
 		$codec = "libx264 -vf \"format=yuv420p\" -preset veryfast -crf 18 -acodec aac -strict -2 -b:a 320k -threads  0 ";
 	}
 	else if($_GET['quality'] == "Medium")
 	{
-
 		$codec = "libx264 -vf \"format=yuv420p\" -preset veryfast -crf 25 -acodec aac -strict -2 -b:a 192k -threads  0 ";
 	}
 	else if($_GET['quality'] == "Low")
 	{
-
 		$codec = "libx264 -vf \"format=yuv420p\" -preset veryfast -crf 31 -acodec aac -strict -2 -b:a 128k -threads  0 ";
 	}
 	

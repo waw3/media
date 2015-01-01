@@ -6,6 +6,7 @@
  -o-animation: color_change 1s infinite alternate;
  animation: color_change 1s infinite alternate;
 }
+audio{background:#666;width:400px;padding:20px;}
 
 @-webkit-keyframes color_change {
  from { color: red; }
@@ -143,8 +144,31 @@ p
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
-	
-
+}
+#header2
+{
+	color: #FFFFFF;
+	position: relative;
+	display: inline-block;
+	float: left;
+	margin-top: 5px;
+	padding-right: 5px;
+	padding-left: 5px;
+    background-color: #101010;
+    max-width: 60px;
+	max-height: 700px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+}
+#uploadForm
+{
+	width: 500px; 
+	height: 400px; 
+	background-color: #202020;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	border-radius: 10px;
 }
 #submit
 {

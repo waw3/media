@@ -1,5 +1,9 @@
 <?php 
-if($_SERVER['SERVER_PORT'] != '443') { header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); exit(); }
+if($_SERVER['SERVER_PORT'] != '443') 
+{ 
+	header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+	exit(); 
+ }
 require "template.php"; 
 $template = new template();
 $template->startSessionAdmin();
@@ -42,7 +46,8 @@ $sql="SELECT id, username, userGroup FROM users WHERE username = '$user'";
 if(!empty($_GET['edit']))
 {
 $username = $_GET['edit'];
-$sql="SELECT ID, username, firstname, lastname, regdate, userGroup , activated FROM users WHERE username = ?";
+$sql="SELECT ID, username, firstname, lastname, regdate, userGroup,".
+" activated FROM users WHERE username = ?";
 $query = $con->prepare($sql);
 $query->execute(array($username));
 $row = $query->fetch(PDO::FETCH_ASSOC);
@@ -64,12 +69,18 @@ if(!empty($row))
 <form action="" method="post" style="max-width: 500px;" enctype="multipart/form-data">
 	<table style=" min-width: 500px; table-layout: fixed;">
 	<tr></tr>
-	<tr><td>First Name: </td><td><?php print $firstname; ?></td><td><input type="text" name="fname"></td></tr>
-	<tr><td>Last Name: </td><td><?php print $lastname; ?></td><td><input type="text" name="lname"></td></tr>
-	<tr><td>Username: </td><td><?php print $username; ?></td><td><input type="text" name="uname"></td></tr>
-	<tr><td>New Password: </td><td></td><td><input type="password" name="nPass"/></td></tr>
-	<tr><td>Confirm Password: </td><td></td><td><input type="password" name="cPass"/></td></tr>
-	<tr><td>Registration Date: </th><td><?php print $dateCreated[0]; ?></td><td></td></tr>
+	<tr><td>First Name: </td><td><?php print $firstname; ?></td>
+	<td><input type="text" name="fname"></td></tr>
+	<tr><td>Last Name: </td><td><?php print $lastname; ?></td>
+	<td><input type="text" name="lname"></td></tr>
+	<tr><td>Username: </td><td><?php print $username; ?></td>
+	<td><input type="text" name="uname"></td></tr>
+	<tr><td>New Password: </td><td></td>
+	<td><input type="password" name="nPass"/></td></tr>
+	<tr><td>Confirm Password: </td><td></td>
+	<td><input type="password" name="cPass"/></td></tr>
+	<tr><td>Registration Date: </th><td><?php print $dateCreated[0]; ?></td>
+	<td></td></tr>
 
 		<?php if($status == 0) 
 		{ 
@@ -87,7 +98,10 @@ if(!empty($row))
 			$label = '<font style="color: red">Banned</font>';
 		}
 		?>
-		<tr><td>Status: </td><td><?php print $label; ?></td><td><input id="button" style="background: none;" type="submit" name="status" value="<?php print $value; ?>"></td></tr>
+		<tr><td>Status: </td><td><?php print $label; ?></td>
+		<td><input id="button" 
+		style="background: none;" type="submit" name="status" 
+		value="<?php print $value; ?>"></td></tr>
 	</center>
 	</table>
 	<input id="button" type="submit" name="update" value="Update"><br/>
@@ -107,7 +121,8 @@ $con = null;
 <center>
 <div class="tableDiv">
 	<table style="margin-top: 50px; min-width: 800px; color: black; "> 
-	<th>ID</th> <th>Username</th> <th>First Name</th> <th>Last Name</th> <th>Date Created</th> <th>User Group</th> <th>Status</th> <th>Option</th>
+	<th>ID</th> <th>Username</th> <th>First Name</th> <th>Last Name</th> 
+	<th>Date Created</th> <th>User Group</th> <th>Status</th> <th>Option</th>
 
 	<?php // filling table with data from database.
 	while($row = $query->fetch(PDO::FETCH_ASSOC))
@@ -131,7 +146,10 @@ $con = null;
 			$status = '<font style="color: red">banned</font>';
 		}	
 		print "<tr>";
-		print "<td>$id</td> <td>$username</td> <td>$firstname</td> <td>$lastname</td> <td>$dateCreated</td><td>$userGroup</td><td>$status</td><td><button type=\"button\" id=\"button\" style=\"background: none;\" onclick=\"javascript:location.href='admin.php?edit=$username'\">Edit</button></td>";
+		print "<td>$id</td> <td>$username</td> <td>$firstname</td> <td>$lastname</td>".
+		" <td>$dateCreated</td><td>$userGroup</td><td>$status</td><td>".
+		"<button type=\"button\""." id=\"button\" style=\"background: none;\" ".
+		"onclick=\"javascript:location.href='admin.php?edit=$username'\">Edit</button></td>";
 		print "</tr>\n";
 			
 	}

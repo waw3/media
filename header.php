@@ -32,9 +32,8 @@ else
 ?>
 
 <div id = "header">
-	<div id="nav">
 		<ul><li onclick="javascript:location.href=
 		'<?php print $this->cwd();?>'">Home</li>
 		<?php print $options; ?>
-	</div>
+
 </div>

@@ -1,4 +1,6 @@
 <?php
+require_once "sqlStatement.php";
+date_default_timezone_set('America/Detroit');
 class template
 {
 	private $cssClass="";
@@ -23,7 +25,6 @@ class template
 	}
 	public function changePassword($username, $nPass, $cPass, $oPass)
 	{
-		$con=$this->dbConnect();
 		if($nPass == $cPass)
 		{
 			if(empty($nPass) || empty($cPass) || empty($oPass))
@@ -33,9 +34,8 @@ class template
 			{ 
 				return "<h2>Password has to be at least 6 characters</h2>"; 
 			}
-			$sql = "SELECT password from users WHERE username = ?";
-			$query = $con->prepare($sql);
-			$query->execute(array($username));
+			$sqlQuery = new sql("users", $this->dbConnect());
+			$query = $sqlQuery->select("password","username",$username);
 			$row = $query->fetch(PDO::FETCH_ASSOC);
 
 			if(password_verify($oPass,$row['password']))
@@ -45,25 +45,19 @@ class template
 					return "<h2>That's your current password.</h2>";
 				}
 				$nPass = password_hash($nPass, PASSWORD_DEFAULT);
-				$sql = "UPDATE users SET password = ? WHERE username = ?";
-				$query = $con->prepare($sql);
-				$query->execute(array($nPass, $username));
-				$con = null;
+				$query = $sqlQuery->update("password","username","$nPass $username");
 			}
 			else { $con = null; return "<h2>Old password invalid.</h2>"; }
 		}
 		else { return "<h2>Passwords do not match.</h2>"; }
-		mysqli_close($con);
 		return "<h3>Password was successfully changed.</h3>";
 	}
 	public function login($suppliedUser, $suppliedPass)
 	{
-			$con=$this->dbConnect();
+			$sqlQuery = new sql("users", $this->dbConnect());
 			//sql query to get the information from the database
-			$sql="SELECT id, username, password, userGroup,". 
-			" activated FROM users WHERE username = ? LIMIT 1;"; 
-			$query = $con->prepare($sql);
-			$query->execute(array($suppliedUser));
+			$query = $sqlQuery->select("id username password userGroup activated",
+			"username",$suppliedUser);
 			$row = $query->fetch(PDO::FETCH_ASSOC);
 
 			if($row['activated'] == 0){
@@ -120,7 +114,7 @@ class template
 	//checks the database for the user's information
 	public function register($fName, $lName, $user, $pass, $cPass, $ip)
 	{
-		$con=$this->dbConnect();
+		$sqlQuery = new sql("users", $this->dbConnect());
 		$user=strtolower($user);
 		if(preg_match('/\s/',$fName) 
 		|| preg_match('/\s/',$lName) 
@@ -160,24 +154,37 @@ class template
 			"shorter than 6 characters.</h2>";
 		}
 
-		$sql="SELECT username FROM users WHERE username= ?;";
-		$query = $con->prepare($sql);
-		$query->execute(array($user));
+		if(strtolower($user) == "public")
+		{
+			return "<h2>Invalid User</h2>";
+		}
+		$query = $sqlQuery->select("username","username","$user");
 		$row=$query->fetch();
 		if(!empty($row))
 		{
 			$con = null;
 			return "<h2>Username has been taken</h2>";
 		}
+		$query = $sqlQuery->select("ip regdate","ip","$ip","ORDER BY id DESC");
+		$count = $query->rowCount();
+		
+		if($count > 5)
+		{
+			$row = $query->fetch();
+			$date = $row['regdate'];
+			$seconds = strtotime("$date");
+			$currentSeconds = strtotime("now");
+
+			if($seconds+86400 > $currentSeconds)
+			{
+				return "<h2>You have registered too many times please try again in: ".
+				round((($seconds+86400)-$currentSeconds)/3600,2) . " hour(s).";
+			}
+		}
 		$pass=password_hash($pass,PASSWORD_DEFAULT);
-		$sql = "INSERT INTO users ".
-		"(username,password,firstname,lastname, ".
-		"regdate, ip, userGroup, activated) VALUES ".
-		"(?, ?, ?, ?, now(), ".
-		"?,'standard', '0')";
-		$query = $con->prepare($sql);
-		$query->execute(array($user, $pass, $fName, $lName, $ip));
-		$con = null;
+		$sqlQuery->insert("username password firstname lastname".
+		" regdate ip userGroup activated",
+		"$user $pass $fName $lName now() $ip standard 0");
 		return "<h3>Your account has been created. ".
 		"However, the administrator has to activate ".
 		"the account.</h3>";
@@ -200,13 +207,11 @@ class template
 		}
 		else
 		{
+			$sqlQuery = new sql("users", $this->dbConnect());
 			//This runs to check if the user has been banned.
 			$username=$_SESSION['username'];
-			$con=$this->dbConnect();
-			//sql query to get the information from the database
-			$sql="SELECT activated FROM users WHERE ". 
-			"username='$username' LIMIT 1;"; 
-			$query=$con->query($sql);
+
+			$query = $sqlQuery->select("activated","username","$username");
 			$row=$query->fetch(PDO::FETCH_ASSOC);
 			if($row['activated'] == 2)
 			{
@@ -219,10 +224,8 @@ class template
 		if($_SESSION['group'] == "admin")
 		{
 			//This statement will check if there are any users to be activated.
-			$con=$this->dbConnect();
-			$sql="SELECT activated FROM users WHERE activated='0';";
-			$query=$con->query($sql);
-			$row=$query->fetch(PDO::FETCH_ASSOC);
+			$sqlQuery = new sql("users", $this->dbConnect());
+			$query = $sqlQuery->select("activated","activated","0");
 			if($query->rowCount() != 0)
 			{
 				$this->setClass('class="newUser"');
@@ -270,6 +273,7 @@ class template
 			<meta http-equiv="Cache-control" content="public">
 			<meta charset="UTF-8">
 			<?php if(!empty($function)){$this->$function(); $this->loadBar();}?>
+			
 		</head>	
 		<body>
 		<?php $this->styles(); 
@@ -362,12 +366,11 @@ class template
 		{
 		
 		?>
-		<script>
+	<script>
 		var video= videojs('MY_VIDEO_1');
 				
 		video.src("<?php print $videoname."&quality=High&time=0"; ?>");
 		// hack duration
-
 		video.duration= function() { return video.theDuration; };
 		
 		video.start= 0;
@@ -427,6 +430,17 @@ class template
 		elseif(preg_match('/Safari/i',$u_agent)) { return "Safari"; }
 		elseif(preg_match('/Opera/i',$u_agent)) { return "Opera"; }
 		elseif(preg_match('/Netscape/i',$u_agent)) { return "Netscape"; }
+	}
+	function header2()
+	{
+	?>
+	<div id = "header2">
+	<ul><li onclick="javascript:location.href='music.php?v=pub'">Public</li>
+	<li onclick="javascript:location.href='music.php?v=priv'">
+	Private</li><li onclick="javascript:location.href='music.php?m=upload'">
+	Upload</li></ul>
+	</div>
+<?php
 	}
 }
 ?>
