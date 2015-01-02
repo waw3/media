@@ -1,7 +1,7 @@
 <?php
 class sql
 {
-	function __construct($tableName, $dbCon)
+	function __construct($tableName, &$dbCon)
 	{
 		$this->table = $tableName;
 		$this->con = $dbCon;
@@ -20,14 +20,17 @@ class sql
 			$where = implode(" = ? AND ", $where);
 			$where .= " = ?";
 			$sqlString = "SELECT $col FROM $this->table WHERE $where $options";
+			$this->query = $this->con->prepare($sqlString);
+			$this->query->execute($vars);
 		}
 		else
 		{
-			$sqlString = "SELECT $col FROM $table $options";
+			$sqlString = "SELECT $col FROM $this->table $options";
+			$this->query = $this->con->query($sqlString);
 		}
-		$this->query = $this->con->prepare($sqlString);
-		$this->query->execute($vars);
-		return $this->query;
+		
+		$fetch = $this->query->fetchAll(PDO::FETCH_ASSOC);
+		return $fetch;
 	}
 	function insert($col, $vars, $options = "")
 	{

@@ -14,10 +14,10 @@ if($template->getBrowser() != "Firefox")
 	header('Content-Disposition: atteachment; filename="'.$rString.'.mkv"');
 	if(!empty($_GET['time'])){$time = $_GET['time'];}
 	else { $time = 0; }
-	$cmd = "/usr/local/bin/ffmpeg -ss $time -re ";
+	$cmd = "/usr/local/bin/ffmpeg -ss $time ";
 	if($_GET['quality'] == "source")
 	{ 
-		$cmd = "/usr/local/bin/ffmpeg -ss $time -itsoffset 10 -re ";
+		$cmd = "/usr/local/bin/ffmpeg -ss $time -itsoffset 10 ";
 		$vcodec = "copy  ";
 	}
 	else if($_GET['quality'] == "High")

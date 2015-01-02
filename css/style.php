@@ -59,12 +59,7 @@ formtext
 	margin-right: 25px;
     text-align: right;
 }
-input
-{
-	float: right;
-	margin-left: 10px;
-	outline-color: red;
-}
+
 p
 {
 	text-align: right;
@@ -117,6 +112,8 @@ p
 	max-width: 500px;
 	height: 28px;
 	right: 20px;
+	padding-left: 4px;
+	padding-right: 4px;
 	margin-top: 5px;
 	-moz-box-shadow: 0 0 10px 2px #FFFFFF;
 	-webkit-box-shadow: 0 0   10px 2px #FFFFFF;

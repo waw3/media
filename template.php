@@ -5,7 +5,7 @@ class template
 {
 	private $cssClass="";
 	//gets the current working current directory without the document root.
-	public function cwd() 
+	public function cwd()
 	{
 		return substr(getcwd(), strlen($_SERVER['DOCUMENT_ROOT']));
 	}
@@ -23,6 +23,80 @@ class template
 		}
 		return $con;
 	}
+	public function setup($dbUser, $dbPass)
+	{
+		if(!is_dir(getcwd().'/Logs'))
+		{
+			$file = getcwd()."/Logs";
+			if(!mkdir($file,0774,true))
+			{
+				return "<h2>Unable to create file Logs, please check file permissions</h2>";
+			}
+		}
+		if(!is_dir(getcwd().'/config'))
+		{
+			$file = getcwd()."/config";
+			if(!mkdir($file,0774))
+			{
+				return "<h2>Unable to create config, please check file permissions</h2>";
+			}
+		}
+		if(!is_dir(getcwd().'/metadata'))
+		{
+			$file = getcwd()."/metadata";
+			if(!mkdir($file,0774))
+			{
+				return "<h2>Unable to create metadata, please check file permissions</h2>";
+			}
+		}
+
+		try 
+		{
+			$con = new PDO("mysql:host=localhost;","$dbUser","$dbPass");
+			$con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$query = $con->query("show databases");
+			$data = $query->fetchAll();
+			$dbExists = false;
+			for($i = 0; $i < count($data); $i++)
+			{
+				if($data[$i]['Database'] == "simpleMediaStreamer")
+				{
+					$dbExists = true;
+				}
+			}
+			if($dbExists)
+			{
+				$password = substr(password_hash($this->get_random_string(12),
+				PASSWORD_DEFAULT),25);
+				$con->query("GRANT ALL PRIVILEGES ON simpleMediaStreamer.* TO ".
+				"'smsDatabase'@'localhost' IDENTIFIED BY '$password' WITH GRANT OPTION;");
+				$f = fopen("config/databaseUser.txt", 'w');
+				fwrite($f,"smsDatabase\n$password\nsimpleMediaStreamer");
+				fclose($f);
+				return "<h3>Created databaseUser file.<h3>";
+			}
+			$con->query("CREATE DATABASE simpleMediaStreamer");
+			$password = substr(password_hash($this->get_random_string(12),
+			PASSWORD_DEFAULT),25);
+			$con->query("GRANT ALL PRIVILEGES ON simpleMediaStreamer.* TO ".
+			"'smsDatabase'@'localhost' IDENTIFIED BY '$password' WITH GRANT OPTION;");
+			$f = fopen("config/databaseUser.txt", 'w');
+			fwrite($f,"smsDatabase\n$password\nsimpleMediaStreamer");
+			fclose($f);
+			$con->query("use simpleMediaStreamer");
+			$con->query("CREATE TABLE users (ID INT(32) ".
+			"NOT NULL AUTO_INCREMENT, username VARCHAR(64), password ".
+			"VARCHAR(255), firstname VARCHAR(30), lastname VARCHAR(30), ".
+			"regdate DATETIME, ip VARCHAR(15), userGroup VARCHAR(8), ".
+			"activated TINYINT, primary KEY (ID));");
+			return "<h3>Done, please register an account.<h3>";
+		}
+		catch(PDOException $e)
+		{
+				return $e->getMessage();
+		}
+		
+	}
 	public function changePassword($username, $nPass, $cPass, $oPass)
 	{
 		if($nPass == $cPass)
@@ -35,12 +109,11 @@ class template
 				return "<h2>Password has to be at least 6 characters</h2>"; 
 			}
 			$sqlQuery = new sql("users", $this->dbConnect());
-			$query = $sqlQuery->select("password","username",$username);
-			$row = $query->fetch(PDO::FETCH_ASSOC);
+			$row = $sqlQuery->select("password","username",$username);
 
-			if(password_verify($oPass,$row['password']))
+			if(password_verify($oPass,$row[0]['password']))
 			{
-				if(password_verify($nPass,$row['password']))
+				if(password_verify($nPass,$row[0]['password']))
 				{
 					return "<h2>That's your current password.</h2>";
 				}
@@ -56,26 +129,25 @@ class template
 	{
 			$sqlQuery = new sql("users", $this->dbConnect());
 			//sql query to get the information from the database
-			$query = $sqlQuery->select("id username password userGroup activated",
+			$row = $sqlQuery->select("id username password userGroup activated",
 			"username",$suppliedUser);
-			$row = $query->fetch(PDO::FETCH_ASSOC);
 
-			if($row['activated'] == 0){
+			if($row[0]['activated'] == 0){
 				return "<h2>Account isn't active.</h2>";
 			}
-			elseif($row['activated'] == 2)
+			elseif($row[0]['activated'] == 2)
 			{
 				return "<h2>Account has been banned.</h2>";
 			}
 			//checking if the password matches.
-			if(password_verify($suppliedPass,$row['password'])) 
+			if(password_verify($suppliedPass,$row[0]['password'])) 
 			{
 				session_start();
 				$root=$this->cwd();
 				//setting session variables.
-				$_SESSION['username']=$row['username'];
+				$_SESSION['username']=$row[0]['username'];
 				$_SESSION['activity']=time();
-				$_SESSION['group']=$row['userGroup'];
+				$_SESSION['group']=$row[0]['userGroup'];
 				header("Location: $root ");
 			} 
 			else
@@ -158,16 +230,23 @@ class template
 		{
 			return "<h2>Invalid User</h2>";
 		}
-		$query = $sqlQuery->select("username","username","$user");
-		$row=$query->fetch();
-		if(!empty($row))
+		$row = $sqlQuery->select();
+		if(count($row) == 0)
+		{
+			$pass=password_hash($pass,PASSWORD_DEFAULT);
+			$sqlQuery->insert("username password firstname lastname".
+			" regdate ip userGroup activated",
+			"$user $pass $fName $lName now() $ip admin 1");
+			return "<h3>Account created.<h3>";
+		}
+		$row = $sqlQuery->select("username","username","$user");
+		if(!empty($row[0]))
 		{
 			$con = null;
 			return "<h2>Username has been taken</h2>";
 		}
-		$query = $sqlQuery->select("ip regdate","ip","$ip","ORDER BY id DESC");
-		$count = $query->rowCount();
-		
+		$row = $sqlQuery->select("ip regdate","ip","$ip","ORDER BY id DESC");
+		$count = count($row);
 		if($count > 5)
 		{
 			$row = $query->fetch();
@@ -211,9 +290,8 @@ class template
 			//This runs to check if the user has been banned.
 			$username=$_SESSION['username'];
 
-			$query = $sqlQuery->select("activated","username","$username");
-			$row=$query->fetch(PDO::FETCH_ASSOC);
-			if($row['activated'] == 2)
+			$row = $sqlQuery->select("activated","username","$username");
+			if($row[0]['activated'] == 2)
 			{
 				unset($_SESSION);
 				session_destroy();
@@ -225,8 +303,8 @@ class template
 		{
 			//This statement will check if there are any users to be activated.
 			$sqlQuery = new sql("users", $this->dbConnect());
-			$query = $sqlQuery->select("activated","activated","0");
-			if($query->rowCount() != 0)
+			$row = $sqlQuery->select("activated","activated","0");
+			if(count($row) != 0)
 			{
 				$this->setClass('class="newUser"');
 			}
@@ -281,10 +359,10 @@ class template
 			<div id ="wrapper">
 				<div id="searchbar">
 				<form action ="movies.php" method="post" 
-				style="margin-top: 5px;">
-					<input id="submit" type="submit" value="Search" 
-					name="search" style="height: 17px;" />
-					<input type="search" id="textfield" name="searchtext"/>
+				style="margin-top: 3px;">
+				<input type="search" id="textfield" name="searchtext"/>
+				<input id="submit" type="submit" value="Search"
+				name="search" style="height: 17px;" />
 				</form>
 				</div>
 			<?php if(!$this->isMobile()){ include "header.php"; } ?>
@@ -434,12 +512,23 @@ class template
 	function header2()
 	{
 	?>
-	<div id = "header2">
-	<ul><li onclick="javascript:location.href='music.php?v=pub'">Public</li>
-	<li onclick="javascript:location.href='music.php?v=priv'">
-	Private</li><li onclick="javascript:location.href='music.php?m=upload'">
-	Upload</li></ul>
-	</div>
+		<div id = "header2">
+		<ul><li onclick="javascript:location.href='music.php?v=pub'">Public</li>
+		<li onclick="javascript:location.href='music.php?v=priv'">
+		Private</li><li onclick="javascript:location.href='music.php?m=upload'">
+		Upload</li></ul>
+		</div>
+<?php
+	}
+	function adminMenu()
+	{
+		?>
+		<div id = "header2">
+		<ul><li onclick="javascript:location.href='admin.php?edit=list'">Users</li>
+		<li onclick="javascript:location.href='admin.php?edit=settings'">
+		Settings</li><li onclick="javascript:location.href='setup.php'">
+		Setup</li></ul>
+		</div>
 <?php
 	}
 }
