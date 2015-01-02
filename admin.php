@@ -12,11 +12,10 @@ if(!empty($_POST['status']))
 
 	$user = $_GET['edit'];
 	$sqlQuery = new sql("users", $template->dbConnect());
-	$query = $sqlQuery->select("id username userGroup","username",$user);
-	$row = $query->fetch(PDO::FETCH_ASSOC);
-	$username = $row['username'];
-	$group = $row['userGroup'];
-	$id = $row['id'];
+	$row = $sqlQuery->select("id username userGroup","username",$user);
+	$username = $row[0]['username'];
+	$group = $row[0]['userGroup'];
+	$id = $row[0]['id'];
 	if($group == "admin" || $id == 0) { $msg = "<h2>Cannot ban admin</h2>"; }
 	else
 	{
