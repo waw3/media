@@ -9,7 +9,8 @@ class template
 	{
 		return substr(getcwd(), strlen($_SERVER['DOCUMENT_ROOT']));
 	}
-	public function dbConnect() // connects to database using the config file.
+	// connects to database using the config file.
+	public function dbConnect() 
 	{
 		$dbUser=file_get_contents("config/databaseUser.txt");
 		$dbUser=explode("\n",$dbUser);

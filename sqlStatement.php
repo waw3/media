@@ -57,7 +57,7 @@ class sql
 	}
 	function delete()
 	{
-		$sqlString .= "delete from $table";
+		//1. Add stuff for delete. 2. Profit?
 	}
 	function update($col, $where = "", $vars = "", $options = "")
 	{

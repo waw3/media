@@ -6,7 +6,12 @@
  -o-animation: color_change 1s infinite alternate;
  animation: color_change 1s infinite alternate;
 }
-audio{background:#666;width:400px;padding:20px;}
+audio
+{
+	background:#666;
+	width:400px;
+	padding:5px;
+}
 
 @-webkit-keyframes color_change {
  from { color: red; }
@@ -112,8 +117,8 @@ p
 	max-width: 500px;
 	height: 28px;
 	right: 20px;
-	padding-left: 4px;
-	padding-right: 4px;
+	padding-left: 6px;
+	padding-right: 6px;
 	margin-top: 5px;
 	-moz-box-shadow: 0 0 10px 2px #FFFFFF;
 	-webkit-box-shadow: 0 0   10px 2px #FFFFFF;
@@ -456,3 +461,19 @@ ul li:hover
 	border-width:0px 0px 1px 1px;
 }
 .tableDiv th { color: white; padding:7px; }
+#musiclist
+{
+	height: 25px;
+	max-width: 600px;
+	margin: 0 auto;
+	border-style: ridge;
+    border-width: medium;
+	border-color: #303030;
+	background-color:#202020;
+}
+#musiclist:hover
+{
+	cursor:pointer;
+
+	background-color: #606060;
+}

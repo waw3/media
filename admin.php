@@ -1,4 +1,5 @@
 <?php 
+
 require "template.php";
 $template = new template();
 $template->startSessionAdmin();
@@ -7,10 +8,56 @@ $template->createPage("Admin control panel");
 $template->adminMenu();
 $msg = "";
 //Changes the user's activated status.
+
+if(!empty($_POST['update']))
+{
+	$user = $_GET['edituser'];
+	$sqlQuery = new sql("users", $template->dbConnect());
+	$col = array();
+	$vars = array();
+	if($_POST['nPass'] != $_POST['cPass'])
+	{
+		$msg = "<h2>Passwords do not match<h2>";
+	}
+	else
+	{
+		if(!empty($_POST['uname']))
+		{
+			array_push($col,"username");
+			array_push($vars,$_POST['uname']);
+		}
+		if(!empty($_POST['nPass']))
+		{
+			array_push($col,"password");
+			$pass=password_hash($_POST['nPass'],PASSWORD_DEFAULT);
+			array_push($vars,$pass);
+		}
+		if(!empty($_POST['fname']))
+		{
+			array_push($col,"firstname");
+			array_push($vars,$_POST['fname']);
+		}
+		if(!empty($_POST['lname']))
+		{
+			array_push($col,"lastname");
+			array_push($vars,$_POST['lname']);
+		}
+		array_push($vars,$user);
+		$col = implode($col," ");
+		$vars = implode($vars," ");
+		$sqlQuery->update($col,"username",$vars);
+		if(!empty($_POST['uname']))
+		{
+			$user = $_POST['uname'];
+			header("Location: admin.php?edituser=$user");
+		}
+	}
+}
+
 if(!empty($_POST['status']))
 {
 
-	$user = $_GET['edit'];
+	$user = $_GET['edituser'];
 	$sqlQuery = new sql("users", $template->dbConnect());
 	$row = $sqlQuery->select("id username userGroup","username",$user);
 	$username = $row[0]['username'];
@@ -30,8 +77,8 @@ if(!empty($_POST['status']))
 		else
 		{
 			$sqlQuery->update("activated","username","1 $username");
-		}		
-	}	
+		}
+	}
 }
 
 //Shows information on a single user.
@@ -91,7 +138,7 @@ else if($_GET['edit'] == "list")
 		print "<td>$id</td> <td>$username</td> <td>$firstname</td> <td>$lastname</td>".
 		" <td>$dateCreated</td><td>$userGroup</td><td>$status</td><td>".
 		"<button type=\"button\""." id=\"button\" style=\"background: none;\" ".
-		"onclick=\"javascript:location.href='admin.php?edit=$username'\">Edit</button></td>";
+		"onclick=\"javascript:location.href='admin.php?edituser=$username'\">Edit</button></td>";
 		print "</tr>\n";
 			
 	}
@@ -101,10 +148,10 @@ else if($_GET['edit'] == "list")
 	</center>
 <?php
 }
-else if(!empty($_GET['edit']))
+else if(!empty($_GET['edituser']))
 {
 	$sqlQuery = new sql("users", $template->dbConnect());
-	$username = $_GET['edit'];
+	$username = $_GET['edituser'];
 	$row = $sqlQuery->select("ID username firstname lastname regdate".
 	" userGroup activated","username",$username);
 	if(!empty($row))

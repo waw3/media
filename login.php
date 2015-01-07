@@ -8,7 +8,7 @@ require "template.php";
 $template = new template();
 if(isset($_POST['username'])) 
 {
-	$errmsg = $template->login( strtolower($_POST["username"]),$_POST["password"]);
+	$errmsg = $template->login(strtolower($_POST["username"]),$_POST["password"]);
 }
 $template->createPage("Login");
 ?>
@@ -18,5 +18,5 @@ $template->createPage("Login");
 		<p>Password: <input type="password" name="password" required/></p>
 		<input id="button" type="submit" value="Login" name="submit" /><br>
 	</form>
-	<?php print $errmsg; ?>
-<?php $template->endPage(); ?>
+<?php print $errmsg;
+$template->endPage(); ?>
