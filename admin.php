@@ -82,7 +82,7 @@ if(!empty($_POST['status']))
 }
 
 //Shows information on a single user.
-if($_GET['edit'] == "settings")
+if(isset($_GET['edit']) && $_GET['edit'] == "settings")
 {
 ?>
 <center>
@@ -100,7 +100,7 @@ if($_GET['edit'] == "settings")
 	</center>
 <?php
 }
-else if($_GET['edit'] == "list")
+else if(isset($_GET['edit']) && $_GET['edit'] == "list")
 {
 
 	$sql='SELECT ID, username, firstname, lastname, regdate, '.
@@ -150,7 +150,8 @@ else if($_GET['edit'] == "list")
 }
 else if(!empty($_GET['edituser']))
 {
-	$sqlQuery = new sql("users", $template->dbConnect());
+	$con = $template->dbConnect();
+	$sqlQuery = new sql("users",$con);
 	$username = $_GET['edituser'];
 	$row = $sqlQuery->select("ID username firstname lastname regdate".
 	" userGroup activated","username",$username);

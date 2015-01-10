@@ -12,8 +12,10 @@ class template
 	// connects to database using the config file.
 	public function dbConnect() 
 	{
-		$dbUser=file_get_contents("config/databaseUser.txt");
-		$dbUser=explode("\n",$dbUser);
+			$dbUser=file_get_contents("config/databaseUser.txt");
+			if($dbUser === FALSE) { header("Location: setup.php"); }
+			$dbUser=explode("\n",$dbUser);
+
 		try {
 		$con = new PDO("mysql:host=localhost;dbname=$dbUser[2]",
 		"$dbUser[0]","$dbUser[1]");
@@ -44,13 +46,18 @@ class template
 		}
 		if(!is_dir(getcwd().'/metadata'))
 		{
-			$file = getcwd()."/metadata";
-			if(!mkdir($file,0774))
+			$file = getcwd()."/metadata/movies";
+			if(!mkdir($file,0774,true))
 			{
-				return "<h2>Unable to create metadata, please check file permissions</h2>";
+				return "<h2>Unable to create metadata/movies, please check file permissions</h2>";
+			}
+			$file = getcwd()."/metadata/shows";
+			if(!mkdir($file,0774,true))
+			{
+				return "<h2>Unable to create metadata/shows, please check file permissions</h2>";
 			}
 		}
-
+		
 		try 
 		{
 			$con = new PDO("mysql:host=localhost;","$dbUser","$dbPass");
@@ -287,7 +294,8 @@ class template
 		}
 		else
 		{
-			$sqlQuery = new sql("users", $this->dbConnect());
+			$con = $this->dbConnect();
+			$sqlQuery = new sql("users",$con);
 			//This runs to check if the user has been banned.
 			$username=$_SESSION['username'];
 
@@ -303,7 +311,8 @@ class template
 		if($_SESSION['group'] == "admin")
 		{
 			//This statement will check if there are any users to be activated.
-			$sqlQuery = new sql("users", $this->dbConnect());
+			$con = $this->dbConnect();
+			$sqlQuery = new sql("users",$con);
 			$row = $sqlQuery->select("activated","activated","0");
 			if(count($row) != 0)
 			{
@@ -427,7 +436,7 @@ class template
 		</style>
 	<?php
 	}
-	function videojs($videoname, $width, $height, $type, $length="")
+	function videojs($videoname, $width, $height, $type = "", $length = "")
 	{
 		if($this->isMobile())
 		{
@@ -445,7 +454,7 @@ class template
 		{
 		
 		?>
-	<script>
+	<script type="text/javascript">
 		var video= videojs('MY_VIDEO_1');
 				
 		video.src("<?php print $videoname."&quality=High&time=0"; ?>");
@@ -468,8 +477,10 @@ class template
 			video.play();
 			return this;
 		};
-			video.theDuration= <?php print $length; ?>;
+		
+		video.theDuration=<?php print $length; ?>;
 	</script>
+	</video>
 		<?php
 		}
 		else
@@ -531,6 +542,25 @@ class template
 		Setup</li></ul>
 		</div>
 <?php
+	}
+	function clean($var, $dir = "")
+	{
+		if(!empty($dir))
+		{
+			$tmpArray = preg_split("/[\s.]+/",$var);
+			$tmpArray = array_filter($tmpArray, create_function('$var',
+			'return !(preg_match("/(?:mp4|avi|mkv)|'.
+			'(?:HDTV|bluray|WEB-DL|IMAX|EDITION|DTS|DrunkinRG|\w{2,3}rip)'.
+			'|(?:x264)|(?:\d{4})|(?:\d{3,4}p)|nSD|WEB|1-PSY|XviD-LOL|REPACK|DL|(?:AC\d)/i", $var));'));
+			return implode(" ",$tmpArray);
+		}
+		$tmpArray = preg_split("/[\s.]+/",$var);
+		$tmpArray = array_filter($tmpArray, create_function('$var',
+		'return !(preg_match("/(?:mp4|avi|mkv)|'.
+		'(?:HDTV|bluray|WEB-DL|IMAX|EDITION|DTS|DrunkinRG|\w{2,3}rip)'.
+		'|(?:x264)|(?:\d{4})|(?:\d{3,4}p)|nSD|WEB|1-PSY|XviD-LOL|REPACK|DL|(?:AC\d)/i", $var));'));
+		return implode(" ",$tmpArray);
+		
 	}
 }
 ?>

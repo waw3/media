@@ -217,6 +217,10 @@ p
 	-o-transition: all 0.2s;
 	transition: all 0.2s;
 }
+#button:focus
+{
+	outline: none;
+}
 h1 
 {
 	font-size: 23px;
@@ -299,7 +303,7 @@ ul li:hover
     margin: 0 auto;
     text-align:center;
 }
-#moviePosterContainer
+#PosterContainer
 {
     z-index: 200;
 	background-position: center;
@@ -313,11 +317,11 @@ ul li:hover
 	vertical-align: top;
 	max-width: 100%;
 }
-#moviePosterContainer:hover
+#PosterContainer:hover
 {
 	cursor:pointer;
 }
-#moviePosterContainer:hover #movieInfo
+#PosterContainer:hover #movieInfo
 {
 	visibility: visible;
 	display: initial;
@@ -476,4 +480,16 @@ ul li:hover
 	cursor:pointer;
 
 	background-color: #606060;
+}
+a:link {
+    color: white;
+}
+a:hover {
+    color: red;
+}
+a:visited {
+    color: white;
+}
+a:active {
+    color: red;
 }
