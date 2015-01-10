@@ -1,16 +1,21 @@
 <?php
+require_once "sqlStatement.php";
+date_default_timezone_set('America/Detroit');
 class template
 {
 	private $cssClass="";
 	//gets the current working current directory without the document root.
-	public function cwd() 
+	public function cwd()
 	{
 		return substr(getcwd(), strlen($_SERVER['DOCUMENT_ROOT']));
 	}
-	public function dbConnect() // connects to database using the config file.
+	// connects to database using the config file.
+	public function dbConnect() 
 	{
-		$dbUser=file_get_contents("config/databaseUser.txt");
-		$dbUser=explode("\n",$dbUser);
+			$dbUser=file_get_contents("config/databaseUser.txt");
+			if($dbUser === FALSE) { header("Location: setup.php"); }
+			$dbUser=explode("\n",$dbUser);
+
 		try {
 		$con = new PDO("mysql:host=localhost;dbname=$dbUser[2]",
 		"$dbUser[0]","$dbUser[1]");
@@ -21,9 +26,87 @@ class template
 		}
 		return $con;
 	}
+	public function setup($dbUser, $dbPass)
+	{
+		if(!is_dir(getcwd().'/Logs'))
+		{
+			$file = getcwd()."/Logs";
+			if(!mkdir($file,0774,true))
+			{
+				return "<h2>Unable to create file Logs, please check file permissions</h2>";
+			}
+		}
+		if(!is_dir(getcwd().'/config'))
+		{
+			$file = getcwd()."/config";
+			if(!mkdir($file,0774))
+			{
+				return "<h2>Unable to create config, please check file permissions</h2>";
+			}
+		}
+		if(!is_dir(getcwd().'/metadata'))
+		{
+			$file = getcwd()."/metadata/movies";
+			if(!mkdir($file,0774,true))
+			{
+				return "<h2>Unable to create metadata/movies, please check file permissions</h2>";
+			}
+			$file = getcwd()."/metadata/shows";
+			if(!mkdir($file,0774,true))
+			{
+				return "<h2>Unable to create metadata/shows, please check file permissions</h2>";
+			}
+		}
+		
+		try 
+		{
+			$con = new PDO("mysql:host=localhost;","$dbUser","$dbPass");
+			$con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$query = $con->query("show databases");
+			$data = $query->fetchAll();
+			$dbExists = false;
+			for($i = 0; $i < count($data); $i++)
+			{
+				if($data[$i]['Database'] == "simpleMediaStreamer")
+				{
+					$dbExists = true;
+				}
+			}
+			if($dbExists)
+			{
+				$password = substr(password_hash($this->get_random_string(12),
+				PASSWORD_DEFAULT),25);
+				$con->query("GRANT ALL PRIVILEGES ON simpleMediaStreamer.* TO ".
+				"'smsDatabase'@'localhost' IDENTIFIED BY '$password' WITH GRANT OPTION;");
+				$f = fopen("config/databaseUser.txt", 'w');
+				fwrite($f,"smsDatabase\n$password\nsimpleMediaStreamer");
+				fclose($f);
+				return "<h3>Created databaseUser file.<h3>";
+			}
+			$con->query("CREATE DATABASE simpleMediaStreamer");
+			$password = substr(password_hash($this->get_random_string(12),
+			PASSWORD_DEFAULT),25);
+			$con->query("GRANT ALL PRIVILEGES ON simpleMediaStreamer.* TO ".
+			"'smsDatabase'@'localhost' IDENTIFIED BY '$password' WITH GRANT OPTION;");
+			$f = fopen("config/databaseUser.txt", 'w');
+			fwrite($f,"smsDatabase\n$password\nsimpleMediaStreamer");
+			fclose($f);
+			$con->query("use simpleMediaStreamer");
+			$con->query("CREATE TABLE users (ID INT(32) ".
+			"NOT NULL AUTO_INCREMENT, username VARCHAR(64), password ".
+			"VARCHAR(255), firstname VARCHAR(30), lastname VARCHAR(30), ".
+			"regdate DATETIME, ip VARCHAR(15), userGroup VARCHAR(8), ".
+			"activated TINYINT, primary KEY (ID));");
+			return "<h3>Done, please register an account.<h3>";
+		}
+		catch(PDOException $e)
+		{
+				return $e->getMessage();
+		}
+		
+	}
 	public function changePassword($username, $nPass, $cPass, $oPass)
 	{
-		$con=$this->dbConnect();
 		if($nPass == $cPass)
 		{
 			if(empty($nPass) || empty($cPass) || empty($oPass))
@@ -33,55 +116,46 @@ class template
 			{ 
 				return "<h2>Password has to be at least 6 characters</h2>"; 
 			}
-			$sql = "SELECT password from users WHERE username = ?";
-			$query = $con->prepare($sql);
-			$query->execute(array($username));
-			$row = $query->fetch(PDO::FETCH_ASSOC);
+			$sqlQuery = new sql("users", $this->dbConnect());
+			$row = $sqlQuery->select("password","username",$username);
 
-			if(password_verify($oPass,$row['password']))
+			if(password_verify($oPass,$row[0]['password']))
 			{
-				if(password_verify($nPass,$row['password']))
+				if(password_verify($nPass,$row[0]['password']))
 				{
 					return "<h2>That's your current password.</h2>";
 				}
 				$nPass = password_hash($nPass, PASSWORD_DEFAULT);
-				$sql = "UPDATE users SET password = ? WHERE username = ?";
-				$query = $con->prepare($sql);
-				$query->execute(array($nPass, $username));
-				$con = null;
+				$query = $sqlQuery->update("password","username","$nPass $username");
 			}
 			else { $con = null; return "<h2>Old password invalid.</h2>"; }
 		}
 		else { return "<h2>Passwords do not match.</h2>"; }
-		mysqli_close($con);
 		return "<h3>Password was successfully changed.</h3>";
 	}
 	public function login($suppliedUser, $suppliedPass)
 	{
-			$con=$this->dbConnect();
+			$sqlQuery = new sql("users", $this->dbConnect());
 			//sql query to get the information from the database
-			$sql="SELECT id, username, password, userGroup,". 
-			" activated FROM users WHERE username = ? LIMIT 1;"; 
-			$query = $con->prepare($sql);
-			$query->execute(array($suppliedUser));
-			$row = $query->fetch(PDO::FETCH_ASSOC);
+			$row = $sqlQuery->select("id username password userGroup activated",
+			"username",$suppliedUser);
 
-			if($row['activated'] == 0){
+			if($row[0]['activated'] == 0){
 				return "<h2>Account isn't active.</h2>";
 			}
-			elseif($row['activated'] == 2)
+			elseif($row[0]['activated'] == 2)
 			{
 				return "<h2>Account has been banned.</h2>";
 			}
 			//checking if the password matches.
-			if(password_verify($suppliedPass,$row['password'])) 
+			if(password_verify($suppliedPass,$row[0]['password'])) 
 			{
 				session_start();
 				$root=$this->cwd();
 				//setting session variables.
-				$_SESSION['username']=$row['username'];
+				$_SESSION['username']=$row[0]['username'];
 				$_SESSION['activity']=time();
-				$_SESSION['group']=$row['userGroup'];
+				$_SESSION['group']=$row[0]['userGroup'];
 				header("Location: $root ");
 			} 
 			else
@@ -120,7 +194,7 @@ class template
 	//checks the database for the user's information
 	public function register($fName, $lName, $user, $pass, $cPass, $ip)
 	{
-		$con=$this->dbConnect();
+		$sqlQuery = new sql("users", $this->dbConnect());
 		$user=strtolower($user);
 		if(preg_match('/\s/',$fName) 
 		|| preg_match('/\s/',$lName) 
@@ -160,24 +234,44 @@ class template
 			"shorter than 6 characters.</h2>";
 		}
 
-		$sql="SELECT username FROM users WHERE username= ?;";
-		$query = $con->prepare($sql);
-		$query->execute(array($user));
-		$row=$query->fetch();
-		if(!empty($row))
+		if(strtolower($user) == "public")
+		{
+			return "<h2>Invalid User</h2>";
+		}
+		$row = $sqlQuery->select();
+		if(count($row) == 0)
+		{
+			$pass=password_hash($pass,PASSWORD_DEFAULT);
+			$sqlQuery->insert("username password firstname lastname".
+			" regdate ip userGroup activated",
+			"$user $pass $fName $lName now() $ip admin 1");
+			return "<h3>Account created.<h3>";
+		}
+		$row = $sqlQuery->select("username","username","$user");
+		if(!empty($row[0]))
 		{
 			$con = null;
 			return "<h2>Username has been taken</h2>";
 		}
+		$row = $sqlQuery->select("ip regdate","ip","$ip","ORDER BY id DESC");
+		$count = count($row);
+		if($count > 5)
+		{
+			$row = $query->fetch();
+			$date = $row['regdate'];
+			$seconds = strtotime("$date");
+			$currentSeconds = strtotime("now");
+
+			if($seconds+86400 > $currentSeconds)
+			{
+				return "<h2>You have registered too many times please try again in: ".
+				round((($seconds+86400)-$currentSeconds)/3600,2) . " hour(s).";
+			}
+		}
 		$pass=password_hash($pass,PASSWORD_DEFAULT);
-		$sql = "INSERT INTO users ".
-		"(username,password,firstname,lastname, ".
-		"regdate, ip, userGroup, activated) VALUES ".
-		"(?, ?, ?, ?, now(), ".
-		"?,'standard', '0')";
-		$query = $con->prepare($sql);
-		$query->execute(array($user, $pass, $fName, $lName, $ip));
-		$con = null;
+		$sqlQuery->insert("username password firstname lastname".
+		" regdate ip userGroup activated",
+		"$user $pass $fName $lName now() $ip standard 0");
 		return "<h3>Your account has been created. ".
 		"However, the administrator has to activate ".
 		"the account.</h3>";
@@ -200,15 +294,13 @@ class template
 		}
 		else
 		{
+			$con = $this->dbConnect();
+			$sqlQuery = new sql("users",$con);
 			//This runs to check if the user has been banned.
 			$username=$_SESSION['username'];
-			$con=$this->dbConnect();
-			//sql query to get the information from the database
-			$sql="SELECT activated FROM users WHERE ". 
-			"username='$username' LIMIT 1;"; 
-			$query=$con->query($sql);
-			$row=$query->fetch(PDO::FETCH_ASSOC);
-			if($row['activated'] == 2)
+
+			$row = $sqlQuery->select("activated","username","$username");
+			if($row[0]['activated'] == 2)
 			{
 				unset($_SESSION);
 				session_destroy();
@@ -219,11 +311,10 @@ class template
 		if($_SESSION['group'] == "admin")
 		{
 			//This statement will check if there are any users to be activated.
-			$con=$this->dbConnect();
-			$sql="SELECT activated FROM users WHERE activated='0';";
-			$query=$con->query($sql);
-			$row=$query->fetch(PDO::FETCH_ASSOC);
-			if($query->rowCount() != 0)
+			$con = $this->dbConnect();
+			$sqlQuery = new sql("users",$con);
+			$row = $sqlQuery->select("activated","activated","0");
+			if(count($row) != 0)
 			{
 				$this->setClass('class="newUser"');
 			}
@@ -270,6 +361,7 @@ class template
 			<meta http-equiv="Cache-control" content="public">
 			<meta charset="UTF-8">
 			<?php if(!empty($function)){$this->$function(); $this->loadBar();}?>
+			
 		</head>	
 		<body>
 		<?php $this->styles(); 
@@ -277,10 +369,10 @@ class template
 			<div id ="wrapper">
 				<div id="searchbar">
 				<form action ="movies.php" method="post" 
-				style="margin-top: 5px;">
-					<input id="submit" type="submit" value="Search" 
-					name="search" style="height: 17px;" />
-					<input type="search" id="textfield" name="searchtext"/>
+				style="margin-top: 3px;">
+				<input type="search" id="textfield" name="searchtext"/>
+				<input id="submit" type="submit" value="Search"
+				name="search" style="height: 17px;" />
 				</form>
 				</div>
 			<?php if(!$this->isMobile()){ include "header.php"; } ?>
@@ -344,7 +436,7 @@ class template
 		</style>
 	<?php
 	}
-	function videojs($videoname, $width, $height, $type, $length="")
+	function videojs($videoname, $width, $height, $type = "", $length = "")
 	{
 		if($this->isMobile())
 		{
@@ -362,12 +454,11 @@ class template
 		{
 		
 		?>
-		<script>
+	<script type="text/javascript">
 		var video= videojs('MY_VIDEO_1');
 				
 		video.src("<?php print $videoname."&quality=High&time=0"; ?>");
 		// hack duration
-
 		video.duration= function() { return video.theDuration; };
 		
 		video.start= 0;
@@ -386,8 +477,10 @@ class template
 			video.play();
 			return this;
 		};
-			video.theDuration= <?php print $length; ?>;
+		
+		video.theDuration=<?php print $length; ?>;
 	</script>
+	</video>
 		<?php
 		}
 		else
@@ -427,6 +520,47 @@ class template
 		elseif(preg_match('/Safari/i',$u_agent)) { return "Safari"; }
 		elseif(preg_match('/Opera/i',$u_agent)) { return "Opera"; }
 		elseif(preg_match('/Netscape/i',$u_agent)) { return "Netscape"; }
+	}
+	function header2()
+	{
+	?>
+		<div id = "header2">
+		<ul><li onclick="javascript:location.href='music.php?v=pub'">Public</li>
+		<li onclick="javascript:location.href='music.php?v=priv'">
+		Private</li><li onclick="javascript:location.href='music.php?m=upload'">
+		Upload</li></ul>
+		</div>
+<?php
+	}
+	function adminMenu()
+	{
+		?>
+		<div id = "header2">
+		<ul><li onclick="javascript:location.href='admin.php?edit=list'">Users</li>
+		<li onclick="javascript:location.href='admin.php?edit=settings'">
+		Settings</li><li onclick="javascript:location.href='setup.php'">
+		Setup</li></ul>
+		</div>
+<?php
+	}
+	function clean($var, $dir = "")
+	{
+		if(!empty($dir))
+		{
+			$tmpArray = preg_split("/[\s.]+/",$var);
+			$tmpArray = array_filter($tmpArray, create_function('$var',
+			'return !(preg_match("/(?:mp4|avi|mkv)|'.
+			'(?:HDTV|bluray|WEB-DL|IMAX|EDITION|DTS|DrunkinRG|\w{2,3}rip)'.
+			'|(?:x264)|(?:\d{4})|(?:\d{3,4}p)|nSD|WEB|1-PSY|XviD-LOL|REPACK|DL|(?:AC\d)/i", $var));'));
+			return implode(" ",$tmpArray);
+		}
+		$tmpArray = preg_split("/[\s.]+/",$var);
+		$tmpArray = array_filter($tmpArray, create_function('$var',
+		'return !(preg_match("/(?:mp4|avi|mkv)|'.
+		'(?:HDTV|bluray|WEB-DL|IMAX|EDITION|DTS|DrunkinRG|\w{2,3}rip)'.
+		'|(?:x264)|(?:\d{4})|(?:\d{3,4}p)|nSD|WEB|1-PSY|XviD-LOL|REPACK|DL|(?:AC\d)/i", $var));'));
+		return implode(" ",$tmpArray);
+		
 	}
 }
 ?>

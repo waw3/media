@@ -11,7 +11,9 @@ else
 	$options="<li onclick=\"javascript:location.href='/media/logout.php'\">".
 	"Log out</li>". 
 	PHP_EOL . "<li onclick=\"javascript:location.href='/media/movies.php'\">".
-	"Movies</li>".PHP_EOL;
+	"Movies</li>".PHP_EOL .
+	"<li onclick=\"javascript:location.href='/media/shows.php'\">".
+	"Shows</li>".PHP_EOL;
 	if($_SESSION['group'] == "admin")
 	{
 		$options = $options .

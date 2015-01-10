@@ -6,6 +6,12 @@
  -o-animation: color_change 1s infinite alternate;
  animation: color_change 1s infinite alternate;
 }
+audio
+{
+	background:#666;
+	width:400px;
+	padding:5px;
+}
 
 @-webkit-keyframes color_change {
  from { color: red; }
@@ -58,12 +64,7 @@ formtext
 	margin-right: 25px;
     text-align: right;
 }
-input
-{
-	float: right;
-	margin-left: 10px;
-	outline-color: red;
-}
+
 p
 {
 	text-align: right;
@@ -116,6 +117,8 @@ p
 	max-width: 500px;
 	height: 28px;
 	right: 20px;
+	padding-left: 6px;
+	padding-right: 6px;
 	margin-top: 5px;
 	-moz-box-shadow: 0 0 10px 2px #FFFFFF;
 	-webkit-box-shadow: 0 0   10px 2px #FFFFFF;
@@ -143,8 +146,31 @@ p
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
-	
-
+}
+#header2
+{
+	color: #FFFFFF;
+	position: relative;
+	display: inline-block;
+	float: left;
+	margin-top: 5px;
+	padding-right: 5px;
+	padding-left: 5px;
+    background-color: #101010;
+    max-width: 60px;
+	max-height: 700px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+}
+#uploadForm
+{
+	width: 500px; 
+	height: 400px; 
+	background-color: #202020;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	border-radius: 10px;
 }
 #submit
 {
@@ -190,6 +216,10 @@ p
 	-ms-transition: all 0.2s;
 	-o-transition: all 0.2s;
 	transition: all 0.2s;
+}
+#button:focus
+{
+	outline: none;
 }
 h1 
 {
@@ -273,7 +303,7 @@ ul li:hover
     margin: 0 auto;
     text-align:center;
 }
-#moviePosterContainer
+#PosterContainer
 {
     z-index: 200;
 	background-position: center;
@@ -287,11 +317,11 @@ ul li:hover
 	vertical-align: top;
 	max-width: 100%;
 }
-#moviePosterContainer:hover
+#PosterContainer:hover
 {
 	cursor:pointer;
 }
-#moviePosterContainer:hover #movieInfo
+#PosterContainer:hover #movieInfo
 {
 	visibility: visible;
 	display: initial;
@@ -435,3 +465,31 @@ ul li:hover
 	border-width:0px 0px 1px 1px;
 }
 .tableDiv th { color: white; padding:7px; }
+#musiclist
+{
+	height: 25px;
+	max-width: 600px;
+	margin: 0 auto;
+	border-style: ridge;
+    border-width: medium;
+	border-color: #303030;
+	background-color:#202020;
+}
+#musiclist:hover
+{
+	cursor:pointer;
+
+	background-color: #606060;
+}
+a:link {
+    color: white;
+}
+a:hover {
+    color: red;
+}
+a:visited {
+    color: white;
+}
+a:active {
+    color: red;
+}
