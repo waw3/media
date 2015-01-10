@@ -84,18 +84,103 @@ if(!empty($_POST['status']))
 //Shows information on a single user.
 if(isset($_GET['edit']) && $_GET['edit'] == "settings")
 {
+	$mVal = $_POST['mDir'];
+	$sVal = $_POST['sDir'];
+	$muVal = $_POST['muDir'];
+	if(isset($_POST['mCheck']))
+	{
+		if(file_exists($_POST['mDir']))
+		{
+			$msg = "<h3>".$_POST['mDir']." Directory exists</h3>";
+		}
+		else
+		{
+			$msg = "<h2>Directory does not exist</h2>";
+		}	
+	}
+	if(isset($_POST['sCheck']))
+	{
+		if(file_exists($_POST['sDir']))
+		{
+			$msg = "<h3>".$_POST['sDir']." Directory exists</h3>";
+		}
+		else
+		{
+			$msg = "<h2>Directory does not exist</h2>";
+		}
+	}
+	if(isset($_POST['muCheck']))
+	{
+		if(file_exists($_POST['muDir']))
+		{
+			$msg = "<h3>".$_POST['muDir']." Directory exists</h3>";
+		}
+		else
+		{
+			$msg = "<h2>Directory does not exist</h2>";
+		}
+	}
+	if(isset($_POST['submit']))
+	{
+		if(file_exists($_POST['mDir']))
+		{
+			if(file_exists("movies")){exec('rm -rf movies');}
+			$dir = escapeshellarg($_POST['mDir']);
+			$path = getcwd()."/movies";
+			$msg = shell_exec("ln -sf $dir $path");
+		}
+		else if(!empty($_POST['mDir']))
+		{
+			$msg .= "<h2>".$_POST['mDir']." Directory does not exist</h2>";
+		}
+		if(file_exists($_POST['sDir']) && !empty($_POST['sDir']))
+		{
+			if(file_exists("shows")){exec('rm -rf shows');}
+			$dir = escapeshellarg($_POST['sDir']);
+			$path = getcwd()."/shows";
+			$msg = shell_exec("ln -sf $dir $path");
+		}
+		else if(!empty($_POST['sDir']))
+		{
+			$msg .= "<h2>".$_POST['sDir']." Directory does not exist</h2> ";
+		}
+		if(file_exists($_POST['muDir']) && !empty($_POST['muDir']))
+		{
+			if(file_exists("music/public")){exec('rm -rf music/public');}
+			$dir = escapeshellarg($_POST['muDir']);
+			$path = getcwd()."/music/public";
+			$msg = shell_exec("ln -sf $dir $path");
+		}
+		else if(!empty($_POST['muDir']))
+		{
+			$msg .= "<h2>".$_POST['muDir']." Directory does not exist</h2> ";
+		}
+	}
 ?>
 <center>
 	<div class="tableDiv">
-	<form action="" method="post" style="max-width: 500px;" 
+	<form action="" method="post" style="max-width: 400px;" 
 	enctype="multipart/form-data">
 	<table style="margin-top: 50px; min-width: 400px; color: black; ">
 	<tr></tr>
-	<tr><td>Max Bitrate(kbps): </td><td><input type="number" name="quality"/></td>
+	<tr><td>Movie Directory: </td><td><input type="text" value="<?php print $mVal;?>" name="mDir"/>
+	<input id="button" style="background: none;" type="submit" value="Check" 
+	name="mCheck" /></td></tr>
+	<tr><td>Show Directory: </td><td><input type="text" value="<?php print $sVal;?>" name="sDir"/>
+	<input id="button" style="background: none;" type="submit" value="Check" 
+	name="sCheck" /></td></tr>
+	<tr><td>Music Directory: </td><td><input type="text" value="<?php print $muVal;?>" name="muDir"/>
+	<input id="button" style="background: none;" type="submit" value="Check" 
+	name="muCheck" /></td></tr>
+	<tr><td>Max Bitrate(kbps): </td><td><input type="text" name="quality" 
+	size="4"/></td></tr>
 	<tr><td>Enable https </td><td><input type="radio" name="val" value="on">On
 	<input type="radio" name="val" value="off">Off</td>
 	</table>
+	<input id="button" type="submit" value="Submit" name="submit" /><br>
+	<?php print $msg; ?>
 	</form>
+		
 	</div>
 	</center>
 <?php
@@ -135,7 +220,7 @@ else if(isset($_GET['edit']) && $_GET['edit'] == "list")
 			$status = '<font style="color: red">banned</font>';
 		}	
 		print "<tr>";
-		print "<td>$id</td> <td>$username</td> <td>$firstname</td> <td>$lastname</td>".
+		print "<td>$id</td> <td>$username</td> <td>$firstname</td><td>$lastname</td>".
 		" <td>$dateCreated</td><td>$userGroup</td><td>$status</td><td>".
 		"<button type=\"button\""." id=\"button\" style=\"background: none;\" ".
 		"onclick=\"javascript:location.href='admin.php?edituser=$username'\">Edit</button></td>";
@@ -169,7 +254,8 @@ else if(!empty($_GET['edituser']))
 	<h1>Edit User</h1>
 	<center>
 	<div class="tableDiv">
-	<form action="" method="post" style="max-width: 500px;" enctype="multipart/form-data">
+	<form action="" method="post" style="max-width: 500px;" 
+	enctype="multipart/form-data">
 	<table style=" min-width: 500px; table-layout: fixed;">
 	<tr></tr>
 	<tr><td>First Name: </td><td><?php print $firstname; ?></td>

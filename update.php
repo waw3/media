@@ -2,27 +2,27 @@
 include "template.php"; 
 $template = new template();
 $template->startSessionAdmin();
-$files = glob("metadata/*txt");
+$files = glob("metadata/movies/*txt");
 $movies = glob("movies/*.{mp4,mkv,avi}",GLOB_BRACE );
-$count = shell_exec('pgrep -f loadmetadata | wc -l');
+$count = shell_exec('pgrep -f lMovieMeta | wc -l');
 if($count < 2)
 {
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(0);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(1);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(2);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(3);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(4);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(5);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(6);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(7);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(8);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(9);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(10);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(11);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(12);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(13);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(14);" > /dev/null &');
-	exec('/usr/local/bin/php -r "require \'loadmetadata.php\'; metadata(15);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(0);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(1);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(2);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(3);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(4);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(5);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(6);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(7);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(8);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(9);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(10);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(11);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(12);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(13);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(14);" > /dev/null &');
+	exec('/usr/local/bin/php -r "require \'lMovieMeta.php\'; metadata(15);" > /dev/null &');
 }
 $count2 = shell_exec('pgrep -f removemetadata | wc -l');
 if($count2 < 2)
