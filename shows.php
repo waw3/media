@@ -1,8 +1,8 @@
 <?php
-require "template.php"; 
-$template = new template();
-$template->startSessionRestricted();
-function play($show,$season = "",$episode, $files)
+require "vendor/autoload.php";
+$core = new core();
+$core->startSessionRestricted();
+function play($show,$season = "",$episode, &$files)
 {
 	if(!empty($season))
 	{
@@ -13,16 +13,15 @@ function play($show,$season = "",$episode, $files)
 		$dir = "shows/$show/$episode";
 	}
 
-	$nIndex = array_search($dir,$files);
-	$pIndex = $nIndex;
-	$nIndex = $nIndex + 1;
-	$pIndex = $pIndex - 1;
+	$nIndex = $pIndex = array_search($dir,$files);
+	$nIndex++;
+	$pIndex--;
 	$type = substr($dir,strlen($dir)-3);
-	$template = new template();
+	$core = new core();
 	$vTranscode = false;
 	$aTranscode = false;
 	$tTranscode = false;
-	$template->videojsScripts();
+	$core->videojsScripts();
 	$vCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 ".
 	"| grep h264 | grep Stream | wc -l");
 	$aCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 ".
@@ -55,16 +54,16 @@ function play($show,$season = "",$episode, $files)
 		$width = 640;
 		echo '<p style="margin-bottom: 10px; text-align: center;'.
 		' text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.
-		$template->clean(substr($_GET['episode'],0,
+		$core->clean(substr($_GET['episode'],0,
 		strlen($_GET['episode'])-4)).'</p>'.PHP_EOL;
-		if($template->isMobile()) { $height = 180; $width = 320; }
+		if($core->isMobile()) { $height = 180; $width = 320; }
 		if(!empty($length))
 		{ 
-			$template->videojs($dir, $width, $height, $type, $length);
+			$core->videojs($dir, $width, $height, $type, $length);
 		}
 		else 
 		{ 
-			$template->videojs($dir, $width, $height, $type); 
+			$core->videojs($dir, $width, $height, $type); 
 		}
 		if(!empty($season))
 		{
@@ -98,10 +97,20 @@ function play($show,$season = "",$episode, $files)
 		echo '</div>'.PHP_EOL;
 		
 }
-$template->createPage("Shows");
+$core->createPage("Shows","searchBar","shows.php");
 if(empty($_GET['show']))
 {
 	$dirs = array_filter(glob('shows/*'), 'is_dir');
+	if(isset($_POST['searchtext']))
+	{
+		// $search = $_POST['searchtext'];[tT][rR][aA]
+		// $files = glob("metadata/movies/$search.txt");
+		$dirs = array_filter($dirs, 
+		function ($var) { 
+		$search = $_POST['searchtext']; 
+		return (stripos(strtolower($var), strtolower($search)) !== false); 
+		});
+	}
 	sort($dirs, SORT_NATURAL);
 	for($i = 0; $i < count($dirs); $i++)
 	{
@@ -112,25 +121,28 @@ if(empty($_GET['show']))
 	echo '<div style="text-align: center;">'.PHP_EOL;
 	foreach (array_keys($shows) as $showName)
 	{
-		$fileName = $showName;
-		$show = urlencode($showName);
-		$showName = $template->clean($showName, "dir");
-		if(strlen($showName) > 17)
+		if(file_exists("metadata/shows/$showName".".jpeg"))
 		{
-			$showName = substr($showName,0,17) . "...";
+			$fileName = $showName;
+			$show = urlencode($showName);
+			$showName = $core->clean($showName, "dir");
+			if(strlen($showName) > 17)
+			{
+				$showName = substr($showName,0,17) . "...";
+			}
+			echo '<div id="PosterContainer" onclick='.
+			'\'javascript:location.href="/media/shows.php?show='
+			.$show.'"\'>'.PHP_EOL;
+			echo '<label style="cursor:pointer; text-shadow: '.
+			'5px 3px 5px rgba(0,0,0,0.75);">'.
+			$showName.'</label><br>'.PHP_EOL;
+			echo '<img class="lazy img-responsive" id="posters" alt="'.$showName.
+			'" src="images/holder.jpg" data-original="'.
+			"metadata/shows/$fileName".'.jpeg" >'.PHP_EOL;
+			echo '</div>'.PHP_EOL;
 		}
-		echo '<div id="PosterContainer" onclick='.
-		'\'javascript:location.href="/media/shows.php?show='
-		.$show.'"\'>'.PHP_EOL;
-		echo '<label style="cursor:pointer; text-shadow: '.
-		'5px 3px 5px rgba(0,0,0,0.75);">'.
-		$showName.'</label><br>'.PHP_EOL;
-		echo '<img class="lazy img-responsive" id="posters" alt="'.$showName.
-		'" src="images/holder.jpg" data-original="'.
-		"metadata/shows/$fileName".'.jpeg" >'.PHP_EOL;
-		echo '</div>'.PHP_EOL;
 	}
-		echo '</div>'.PHP_EOL;
+			echo '</div>'.PHP_EOL;
 }
 else
 {
@@ -157,7 +169,7 @@ else
 		{
 			$episode = basename($episode);
 			$type = substr($_GET['episode'],strlen($_GET['episode'])-4);
-			$name = $template->clean($episode);
+			$name = $core->clean($episode);
 			$urlEpisode = urlencode($episode.$type);
 			if(strlen($name) > 50)
 			{
@@ -191,7 +203,7 @@ else
 			foreach ($files as $episode)
 			{
 				$episode = urlencode(basename($episode));
-				$name = $template->clean($episode);
+				$name = $core->clean($episode);
 				$urlEpisode = urlencode($episode.$type);
 				if(strlen($name) > 50)
 				{
@@ -209,7 +221,7 @@ else
 			{
 				$season = basename($season);
 				$getSeason = urlencode(basename($season));
-				$name = $template->clean($season, "dir");
+				$name = $core->clean($season, "dir");
 				if(strlen($name) > 50)
 				{
 					$name = substr($name,0,50) . "...";
@@ -222,5 +234,5 @@ else
 		}
 	}
 }
-$template->endPage();
+$core->endPage("lazyload");
 ?>

@@ -1,18 +1,18 @@
 <?php 
 
-require "template.php";
-$template = new template();
-$template->startSessionAdmin();
-$con = $template->dbConnect();
-$template->createPage("Admin control panel");
-$template->adminMenu();
+require "vendor/autoload.php";
+$core = new core();
+$core->startSessionAdmin();
+$con = $core->dbConnect();
+$core->createPage("Admin control panel");
+$core->adminMenu();
 $msg = "";
 //Changes the user's activated status.
 
 if(!empty($_POST['update']))
 {
 	$user = $_GET['edituser'];
-	$sqlQuery = new sql("users", $template->dbConnect());
+	$sqlQuery = new sql("users", $core->dbConnect());
 	$col = array();
 	$vars = array();
 	if($_POST['nPass'] != $_POST['cPass'])
@@ -58,7 +58,7 @@ if(!empty($_POST['status']))
 {
 
 	$user = $_GET['edituser'];
-	$sqlQuery = new sql("users", $template->dbConnect());
+	$sqlQuery = new sql("users", $core->dbConnect());
 	$row = $sqlQuery->select("id username userGroup","username",$user);
 	$username = $row[0]['username'];
 	$group = $row[0]['userGroup'];
@@ -122,12 +122,14 @@ if(isset($_GET['edit']) && $_GET['edit'] == "settings")
 	}
 	if(isset($_POST['submit']))
 	{
+		$configText = array();
 		if(file_exists($_POST['mDir']))
 		{
 			if(file_exists("movies")){exec('rm -rf movies');}
 			$dir = escapeshellarg($_POST['mDir']);
 			$path = getcwd()."/movies";
 			$msg = shell_exec("ln -sf $dir $path");
+			$configText['movieDir'] = $dir;
 		}
 		else if(!empty($_POST['mDir']))
 		{
@@ -139,6 +141,7 @@ if(isset($_GET['edit']) && $_GET['edit'] == "settings")
 			$dir = escapeshellarg($_POST['sDir']);
 			$path = getcwd()."/shows";
 			$msg = shell_exec("ln -sf $dir $path");
+			$configText['showDir'] = $dir;
 		}
 		else if(!empty($_POST['sDir']))
 		{
@@ -150,12 +153,26 @@ if(isset($_GET['edit']) && $_GET['edit'] == "settings")
 			$dir = escapeshellarg($_POST['muDir']);
 			$path = getcwd()."/music/public";
 			$msg = shell_exec("ln -sf $dir $path");
+			$configText['musicDir'] = $dir;
 		}
 		else if(!empty($_POST['muDir']))
 		{
 			$msg .= "<h2>".$_POST['muDir']." Directory does not exist</h2> ";
 		}
+		$configText = json_encode($configText);
+		$f = fopen("config/config.json", 'w');
+		fwrite($f,$configText);
+		fclose($f);
 	}
+		$config = file_get_contents("config/config.json");
+		$config = json_decode($config, true);
+		if(!isset($_POST['mCheck']) && !isset($_POST['sCheck']) && !isset($_POST['mCheck']))
+		{
+			$mVal = str_replace("'", "",$config['movieDir']);
+			$sVal = str_replace("'", "",$config['showDir']);
+			$muVal = str_replace("'", "",$config['musicDir']);
+			//$bVal = str_replace("'", "",$config['bitrate']);
+		}
 ?>
 <center>
 	<div class="tableDiv">
@@ -235,7 +252,7 @@ else if(isset($_GET['edit']) && $_GET['edit'] == "list")
 }
 else if(!empty($_GET['edituser']))
 {
-	$con = $template->dbConnect();
+	$con = $core->dbConnect();
 	$sqlQuery = new sql("users",$con);
 	$username = $_GET['edituser'];
 	$row = $sqlQuery->select("ID username firstname lastname regdate".
@@ -300,4 +317,4 @@ else if(!empty($_GET['edituser']))
 <?php
 }
 //Shows the list of currently registered users.
-$template->endPage(); ?>
+$core->endPage(); ?>

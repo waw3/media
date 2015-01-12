@@ -1,7 +1,7 @@
 <?php
-require_once "sqlStatement.php";
 date_default_timezone_set('America/Detroit');
-class template
+require "vendor/autoload.php";
+class core
 {
 	private $cssClass="";
 	//gets the current working current directory without the document root.
@@ -25,6 +25,14 @@ class template
 			exit();
 		}
 		return $con;
+	}
+	public function requireSSL()
+	{
+		if($_SERVER['SERVER_PORT'] != '443')
+		{
+			header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+			exit();
+		}
 	}
 	public function setup($dbUser, $dbPass)
 	{
@@ -194,7 +202,7 @@ class template
 	//checks the database for the user's information
 	public function register($fName, $lName, $user, $pass, $cPass, $ip)
 	{
-		$sqlQuery = new sql("users", $this->dbConnect());
+		$sqlQuery = new sql("users");
 		$user=strtolower($user);
 		if(preg_match('/\s/',$fName) 
 		|| preg_match('/\s/',$lName) 
@@ -338,17 +346,65 @@ class template
 			header("Location: $dir");
 		}
 	}
-	public function customScrollLazyLoad()
+	public function searchBar($action)
 	{
-		if (!$this->isMobile())
-		{ 
-		?>
-		
-		<?php
+	?>
+		<div id="searchbar">
+			<form action ="<?php print $action; ?>" method="post" 
+				style="margin-top: 3px;">
+				<input type="search" id="textfield" name="searchtext"/>
+				<input id="submit" type="submit" value="Search"
+				name="search" style="height: 17px;" />
+			</form>
+		</div>
+	<?php
+	}
+	public function header()
+	{
+		if(!isset($_SESSION['username'])) 
+		{
+			$options="<li onclick=\"javascript:location.href='/media/login.php'\">".
+			"Log in</li>".PHP_EOL .
+			"<li onclick=\"javascript:location.href='/media/register.php'\">".
+			"Register</li></ul>";
 		}
+		else
+		{
+			$options="<li onclick=\"javascript:location.href='/media/logout.php'\">".
+			"Log out</li>". 
+			PHP_EOL . "<li onclick=\"javascript:location.href='/media/movies.php'\">".
+			"Movies</li>".PHP_EOL .
+			"<li onclick=\"javascript:location.href='/media/shows.php'\">".
+			"Shows</li>".PHP_EOL;
+			if($_SESSION['group'] == "admin")
+			{
+				$options = $options .
+				"<li onclick=\"javascript:location.href='/media/update.php'\">".
+				"Update</li>". PHP_EOL .
+				"<li ".$this->getClass().
+				"onclick=\"javascript:location.href='/media/admin.php'\">".
+				"Admin CP</li></ul>" . PHP_EOL;
+			}
+			else
+			{
+				$options = $options .
+				"<li onclick=\"javascript:location.href='/media/user.php'\">".
+				"User CP</li></ul>". PHP_EOL;
+			}
+		}	
+?>
+
+<div id = "header">
+	<div id="nav">
+		<ul><li onclick="javascript:location.href=
+		'<?php print $this->cwd();?>'">Home</li>
+		<?php print $options; ?>
+	</div>
+</div>
+<?php
 	}
 	//creates opening tags and accepts a page title..
-	public function createPage($title, $function="") 
+	public function createPage($title, $function="",$var="") 
 	{	
 	?>
 		<!doctype html>
@@ -360,32 +416,31 @@ class template
 						initial-scale=1, maximum-scale=1, user-scalable=no">
 			<meta http-equiv="Cache-control" content="public">
 			<meta charset="UTF-8">
-			<?php if(!empty($function)){$this->$function(); $this->loadBar();}?>
-			
 		</head>	
 		<body>
 		<?php $this->styles(); 
 		?>
 			<div id ="wrapper">
-				<div id="searchbar">
-				<form action ="movies.php" method="post" 
-				style="margin-top: 3px;">
-				<input type="search" id="textfield" name="searchtext"/>
-				<input id="submit" type="submit" value="Search"
-				name="search" style="height: 17px;" />
-				</form>
-				</div>
-			<?php if(!$this->isMobile()){ include "header.php"; } ?>
+			<?php if(!$this->isMobile()){ $this->header(); } ?>
+			<?php if(!empty($function)){$this->$function($var);}?>
 			<div id="main" >
 	<?php
 	}
 	//echos the closing tags of the html page.
-	public function endPage() 
+	public function endPage($function = "") 
 	{
 	?>
 		</div>
-		<?php if($this->isMobile()){ include "header.php"; } ?>
+		<?php if($this->isMobile()){ $this->header(); } ?>
 		</div>
+		<?php if(!empty($function)){$this->$function(); } ?>
+		</body>
+		</html>
+	<?php
+	}
+	function lazyLoad()
+	{
+	?>
 		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 		<script src="javascript/jquery.lazyload.js"></script>
 		<script type="text/javascript" charset="utf-8">
@@ -395,15 +450,6 @@ class template
 			});
 		});
 		</script>
-		</body>
-		</html>
-	<?php
-	}
-	function loadBar()
-	{
-		?>
-		<script src="javascript/pace.js"></script>
-		<link href="css/pace-theme-minimal.css" rel="stylesheet" />
 	<?php
 	}
 	//returns the difference of the current date to the date provided in hours.

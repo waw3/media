@@ -1,12 +1,12 @@
 <?php 
 session_start();
-require "template.php"; 
-$template = new template();
-$template->createPage("Simple Media Streamer");
+require "vendor/autoload.php";
+$core = new core();
+$core->createPage("Simple Media Streamer");
 if(file_exists("config/databaseUser.txt"))
 {
 	print "<h2>Setup has already ran, to rerun please delete the databaseUser file.</h2>".PHP_EOL;
-	$template->endPage();
+	$core->endPage();
 	exit();
 }
 if(!empty($_POST['username']))
@@ -15,7 +15,7 @@ if(!empty($_POST['username']))
 	{
 		echo "<h2>Database root user needs password.</h2>".PHP_EOL;
 	}
-	echo $template->setup($_POST['username'],$_POST['password']);
+	echo $core->setup($_POST['username'],$_POST['password']);
 }
 ?>
 <h1>Setup Database</h1>
@@ -24,4 +24,4 @@ if(!empty($_POST['username']))
 	<p>MySQL password: <input type="password" name="password" required/></p>
 	<input id="button" type="submit" value="Setup" name="submit" /><br>
 </form>
-<?php $template->endPage(); ?>
+<?php $core->endPage(); ?>

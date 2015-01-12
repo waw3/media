@@ -1,16 +1,12 @@
 <?php
-if($_SERVER['SERVER_PORT'] != '443') 
-{
-	header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
-	exit();
-}
-require "template.php"; 
-$template = new template();
-$template->createPage("Register", false);
+require "vendor/autoload.php";
+$core = new core();
+$core->requireSSL();
+$core->createPage("Register");
 $msg = "";
 if($_POST['username'])
 {
-	$msg = $template->register($_POST["fName"], $_POST["lName"],
+	$msg = $core->register($_POST["fName"], $_POST["lName"],
 	$_POST["username"], $_POST["password"], $_POST["cPassword"],
 	$_SERVER['REMOTE_ADDR']);
 }
@@ -27,4 +23,4 @@ if($_POST['username'])
 	</form>
 	<?php print $msg;?>
 	</center>
-<?php $template->endPage(); ?>
+<?php $core->endPage(); ?>

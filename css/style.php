@@ -151,14 +151,16 @@ p
 {
 	color: #FFFFFF;
 	position: relative;
-	display: inline-block;
-	float: left;
-	margin-top: 5px;
+	margin:auto;
+	margin-top: 15px;
 	padding-right: 5px;
 	padding-left: 5px;
     background-color: #101010;
-    max-width: 60px;
-	max-height: 700px;
+    max-width: 155px;
+	max-height: 35px;
+	-moz-box-shadow: 0 0 10px 2px #FFFFFF;
+	-webkit-box-shadow: 0 0   10px 2px #FFFFFF;
+	box-shadow: 0 0 10px 2px #FFFFFF;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;

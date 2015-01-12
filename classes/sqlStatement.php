@@ -1,14 +1,15 @@
 <?php
+require "vendor/autoload.php";
 class sql
 {
-	function __construct($tableName, &$dbCon)
+	function __construct($tableName, $asdf="")
 	{
+		$core = new core();
 		$this->table = $tableName;
-		$this->con = $dbCon;
+		$this->con = $core->dbConnect();
 	}
 	function select($col = "", $where = "", $vars = "", $options = "")
 	{
-		
 		if(empty($col)){ $col = "*"; }
 		else{ $col = explode(" ",$col);$col = implode(", ", $col); }
 		if(!empty($where))

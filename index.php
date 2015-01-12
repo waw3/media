@@ -1,9 +1,9 @@
 
 <?php 
-require "template.php";
-$template = new template();
-$template->startSessionRestricted();
-$template->createPage("Simple Media Streamer");
+require "vendor/autoload.php";
+$core = new core();
+$core->startSessionRestricted();
+$core->createPage("Simple Media Streamer");
 $movieFiles = glob("movies/*.{mp4,mkv,avi,MP4,MKV,AVI}",GLOB_BRACE );
 $movieFiles = array_combine($movieFiles, array_map("filemtime", $movieFiles));
 arsort($movieFiles);
@@ -41,4 +41,4 @@ for($i = 0; $i < $num; $i++)
 }
 echo '</div>'.PHP_EOL;
 ?>
-<?php $template->endPage(); ?>
+<?php $core->endPage(); ?>

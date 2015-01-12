@@ -1,7 +1,7 @@
 <?php
-include "template.php"; 
-$template = new template();
-$template->startSessionAdmin();
+require "vendor/autoload.php";
+$core = new core();
+$core->startSessionAdmin();
 $files = glob("metadata/movies/*txt");
 $movies = glob("movies/*.{mp4,mkv,avi}",GLOB_BRACE );
 $count = shell_exec('pgrep -f lMovieMeta | wc -l');
@@ -29,7 +29,7 @@ if($count2 < 2)
 {
 	//exec('/usr/local/bin/php -r "require \'removemetadata.php\'; metadata();" > /dev/null &');
 }
-$template->createPage("Simple Media Streamer");
+$core->createPage("Simple Media Streamer");
 $unmatched = 0;
 $matched = 0;
 print '<div style="margin-left: 0;width: 500px;">'.PHP_EOL;
@@ -66,4 +66,4 @@ foreach($movies as $value)
 		basename($var); 
 		return (stripos(strtolower($var), strtolower($search)) !== false); 
 	}
-$template->endPage(); ?>
+$core->endPage(); ?>

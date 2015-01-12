@@ -4,9 +4,9 @@ if($_SERVER['SERVER_PORT'] == '443')
 	header('Location: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
 	exit();
 }
-require "template.php"; 
-$template = new template();
-$template->startSessionRestricted();
+require "vendor/autoload.php";
+$core = new core();
+$core->startSessionRestricted();
 $files = glob("metadata/movies/*txt");
 natcasesort($files);
 $get=false;
@@ -32,7 +32,7 @@ substr($_GET["movie"],0,strlen($_GET["movie"])-4)) !== false )
 	$movieinfo = file_get_contents("metadata/movies/".$plainTextMovieName.".txt");
 	$movieinfo = explode("\n",$movieinfo);
 	$dir = "movies/" . html_entity_decode($_GET['movie']);
-	$template->createPage($plainTextMovieName);
+	$core->createPage($plainTextMovieName);
 	$get=true;
 	$title = urlencode($plainTextMovieName);
 	$movieTitle = $movieinfo[1];
@@ -41,14 +41,14 @@ substr($_GET["movie"],0,strlen($_GET["movie"])-4)) !== false )
 }
 else
 {
-	$template->createPage("Simple Media Streamer");
+	$core->createPage("Simple Media Streamer","searchBar","movies.php");
 }
 if($get) //loads the videoplayer if $get is true.
 {
 	$vTranscode = false;
 	$aTranscode = false;
 	$tTranscode = false;
-	$template->videojsScripts();
+	$core->videojsScripts();
 	$vCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 ".
 	"| grep h264 | grep Stream | wc -l");
 	
@@ -87,14 +87,14 @@ if($get) //loads the videoplayer if $get is true.
 		' text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$movieTitle.'</p>'.PHP_EOL;
 		$height = 360;
 		$width = 640;
-		if($template->isMobile()) { $height = 180; $width = 320; }
+		if($core->isMobile()) { $height = 180; $width = 320; }
 		if(!empty($length))
 		{ 
-			$template->videojs($dir, $width, $height, $type, $length);
+			$core->videojs($dir, $width, $height, $type, $length);
 		}
 		else 
 		{ 
-			$template->videojs($dir, $width, $height, $type); 
+			$core->videojs($dir, $width, $height, $type); 
 		}
 		echo '<p style="text-align: left;'.
 		'text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$moviePlot.'</p>'.PHP_EOL;
@@ -141,5 +141,5 @@ else // if get is false then we load the movie list.
 	}
 	echo '</div>'.PHP_EOL;
 }	
-$template->endPage(); 
+$core->endPage("lazyload"); 
 ?>
