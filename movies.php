@@ -48,12 +48,9 @@ if($get) //loads the videoplayer if $get is true.
 	$vTranscode = false;
 	$aTranscode = false;
 	$tTranscode = false;
-	$core->videojsScripts();
-	$vCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 ".
-	"| grep h264 | grep Stream | wc -l");
+	$vCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 | grep h264 | grep Stream | wc -l");
 	
-	$aCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 ".
-	"| grep aac | grep Stream | wc -l");
+	$aCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 | grep aac | grep Stream | wc -l");
 	if($vCount != 1){ $vTranscode = true; }
 	if($aCount != 1){ $aTranscode = true; }
 	if($type == "mkv") { $type = "mp4"; }
@@ -61,62 +58,63 @@ if($get) //loads the videoplayer if $get is true.
 	$length = "";
 	if($vTranscode)
 	{
+		
 		$type = "mp4";
-		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" ".
-		"2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
+		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
 		$length = explode(":",$length);
 		$length = $length[0]*3600 + $length[1]*60 + $length[2];
-		$dir = "transcode.php?movie=".basename($dir);
+		$dir = "transcode.php?media=".basename($dir);
+		
 	}
 	else if($aTranscode)
 	{
 		$type = "mp4";
-		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" ".
-		"2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
+		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
 		$length = explode(":",$length);
 		$length = $length[0]*3600 + $length[1]*60 + $length[2];
-		$dir = "transcode.php?movie=".basename($dir);
+		$dir = "transcode.php?media=".basename($dir);
 	}
-		echo '<div id="contentWrapper">'.PHP_EOL;
-		echo '<div id="videocontainer">'.PHP_EOL;
-		if($movieTitle == "No information") 
-		{ 
-			$movieTitle = $plainTextMovieName; 
-		}
-		echo '<p style="margin-bottom: 10px; text-align: center;'.
-		' text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$movieTitle.'</p>'.PHP_EOL;
-		$height = 360;
-		$width = 640;
-		if($core->isMobile()) { $height = 180; $width = 320; }
-		if(!empty($length))
-		{ 
-			$core->videojs($dir, $width, $height, $type, $length);
-		}
-		else 
-		{ 
-			$core->videojs($dir, $width, $height, $type); 
-		}
-		echo '<p style="text-align: left;'.
-		'text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$moviePlot.'</p>'.PHP_EOL;
-		echo '</div>'.PHP_EOL;
-		echo '<div class="metadataContainer">'.PHP_EOL;
-		$poster = "images/movie";
-		if(file_exists("metadata/movies/$plainTextMovieName.jpeg")) 
-		{ 
-			$poster = "metadata/movies/".$plainTextMovieName;
-		}
-		echo '<img src="'.$poster.'.jpeg"  id="posters" '.
-		'width="'.$width.'" height="'.$height.'">'.PHP_EOL;
-		echo "<p style=\"margin-top: 5px;text-align: center;".
-		"text-shadow: 5px 3px 5px rgba(0,0,0,0.75); \">$movieRating</p>".PHP_EOL;
-		echo '</div>'.PHP_EOL;
-		echo '</div>'.PHP_EOL;
 	
+	$core->videojsScripts();
+	echo '<div id="contentWrapper">'.PHP_EOL;
+	echo '<div id="videocontainer">'.PHP_EOL;
+	if($movieTitle == "No information") 
+	{ 
+		$movieTitle = $plainTextMovieName; 
+	}
+	echo '<p style="margin-bottom: 10px; text-align: center;'.
+	' text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$movieTitle.'</p>'.PHP_EOL;
+	$height = 360;
+	$width = 640;
+	if($core->isMobile()) { $height = 180; $width = 320; }
+	if(!empty($length))
+	{ 
+			$core->videojs($dir, $width, $height, $type, $length);
+	}
+	else 
+	{ 
+		$core->videojs($dir, $width, $height, $type); 
+	}
+	echo '<p style="text-align: left;'.
+	'text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$moviePlot.'</p>'.PHP_EOL;
+	echo '</div>'.PHP_EOL;
+	echo '<div class="metadataContainer">'.PHP_EOL;
+	$poster = "images/movie";
+	if(file_exists("metadata/movies/$plainTextMovieName.jpeg")) 
+	{ 
+		$poster = "metadata/movies/".$plainTextMovieName;
+	}
+	echo '<img src="'.$poster.'.jpeg"  id="posters" '.
+	'width="'.$width.'" height="'.$height.'">'.PHP_EOL;
+	echo "<p style=\"margin-top: 5px;text-align: center;".
+	"text-shadow: 5px 3px 5px rgba(0,0,0,0.75); \">$movieRating</p>".PHP_EOL;
+	echo '</div>'.PHP_EOL;
+	echo '</div>'.PHP_EOL;	
 } 		
 else // if get is false then we load the movie list.
 {	
 	
-	echo '<h1>Movies('.count($files).')</h1>'.PHP_EOL;	
+	echo '<h1 style="margin-top: 50px;">Movies('.count($files).')</h1>'.PHP_EOL;	
 	echo '<div style="text-align: center;">'.PHP_EOL;				 
 	foreach($files as $value) 
 	{

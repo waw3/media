@@ -1,11 +1,7 @@
 <?php 
-if($_SERVER['SERVER_PORT'] != '443')
-{
-	header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
-	exit();
-}
 require "vendor/autoload.php";
 $core = new core();
+$core->requireSSL();
 $core->startSessionRestricted();
 $con = $core->dbConnect();
 $username = $_SESSION['username'];

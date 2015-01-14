@@ -21,80 +21,79 @@ function play($show,$season = "",$episode, &$files)
 	$vTranscode = false;
 	$aTranscode = false;
 	$tTranscode = false;
-	$core->videojsScripts();
-	$vCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 ".
-	"| grep h264 | grep Stream | wc -l");
-	$aCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 ".
-	"| grep aac | grep Stream | wc -l");
+	$vCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 | grep h264 | grep Stream | wc -l");
+	
+	$aCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 | grep aac | grep Stream | wc -l");
 	if($vCount != 1){ $vTranscode = true; }
 	if($aCount != 1){ $aTranscode = true; }
+	if($type == "mkv") { $type = "mp4"; }
+	if($type != "mp4") { $tTranscode = true; }
 	$length = "";
 	if($vTranscode)
 	{
+		
 		$type = "mp4";
-		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" ".
-		"2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
+		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
 		$length = explode(":",$length);
 		$length = $length[0]*3600 + $length[1]*60 + $length[2];
-		$dir = "transcode.php?show=".urlencode($dir);
+		$dir = "transcode.php?media=".urlencode($dir);
+		
 	}
 	else if($aTranscode)
 	{
 		$type = "mp4";
-		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" ".
-		"2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
+		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
 		$length = explode(":",$length);
 		$length = $length[0]*3600 + $length[1]*60 + $length[2];
-		$dir = "transcode.php?show=".urlencode($dir);
-		
+		$dir = "transcode.php?media=".urlencode($dir);
 	}
-		echo '<div id="contentWrapper">'.PHP_EOL;
-		echo '<div id="videocontainer">'.PHP_EOL;
-		$height = 360;
-		$width = 640;
-		echo '<p style="margin-bottom: 10px; text-align: center;'.
-		' text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.
-		$core->clean(substr($_GET['episode'],0,
-		strlen($_GET['episode'])-4)).'</p>'.PHP_EOL;
-		if($core->isMobile()) { $height = 180; $width = 320; }
-		if(!empty($length))
-		{ 
-			$core->videojs($dir, $width, $height, $type, $length);
-		}
-		else 
-		{ 
-			$core->videojs($dir, $width, $height, $type); 
-		}
-		if(!empty($season))
-		{
-			$episode = basename($files[$pIndex]);
-			$episode2 = basename($files[$nIndex]);
-			$pDir = urlencode($show)."&season=".urlencode($season)."&episode=".
-			urlencode($episode);
-			$nDir = urlencode($show)."&season=".urlencode($season)."&episode=".
-			urlencode($episode2);
-			
-		}
-		else
-		{
-			$pDir = urlencode($show)."&episode=".urlencode(basename($files[$pIndex]));
-			$nDir = urlencode($show)."&episode=".urlencode(basename($files[$nIndex]));
-		}
-		$dir = urlencode($dir);
-		if($pIndex >= 0)
-		{
-			print "<button type=\"button\" id=\"button\" style=\"background:".
-			" none; float: left;\" onclick=\"javascript:location.href='shows.php".
-			"?show=$pDir'\">Previous</button>";
-		}
-		if($nIndex < count($files))
-		{
-			print "<button type=\"button\" id=\"button\" style=\"background:".
-			" none; float: right;\" onclick=\"javascript:location.href='shows.php?".
-			"show=$nDir'\">Next</button>";
-		}
-		echo '</div>'.PHP_EOL;
-		echo '</div>'.PHP_EOL;
+	$core->videojsScripts();
+	echo '<div id="contentWrapper">'.PHP_EOL;
+	echo '<div id="videocontainer">'.PHP_EOL;
+	$height = 360;
+	$width = 640;
+	echo '<p style="margin-bottom: 10px; text-align: center;'.
+	' text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.
+	$core->clean(substr($_GET['episode'],0,
+	strlen($_GET['episode'])-4)).'</p>'.PHP_EOL;
+	if($core->isMobile()) { $height = 180; $width = 320; }
+	if(!empty($length))
+	{ 
+		$core->videojs($dir, $width, $height, $type, $length);
+	}
+	else 
+	{ 
+		$core->videojs($dir, $width, $height, $type); 
+	}
+	if(!empty($season))
+	{
+		$episode = basename($files[$pIndex]);
+		$episode2 = basename($files[$nIndex]);
+		$pDir = urlencode($show)."&season=".urlencode($season)."&episode=".
+		urlencode($episode);
+		$nDir = urlencode($show)."&season=".urlencode($season)."&episode=".
+		urlencode($episode2);	
+	}
+	else
+	{
+		$pDir = urlencode($show)."&episode=".urlencode(basename($files[$pIndex]));
+		$nDir = urlencode($show)."&episode=".urlencode(basename($files[$nIndex]));
+	}
+	$dir = urlencode($dir);
+	if($pIndex >= 0)
+	{
+		print "<button type=\"button\" id=\"button\" style=\"background:".
+		" none; float: left;\" onclick=\"javascript:location.href='shows.php".
+		"?show=$pDir'\">Previous</button>";
+	}
+	if($nIndex < count($files))
+	{
+		print "<button type=\"button\" id=\"button\" style=\"background:".
+		" none; float: right;\" onclick=\"javascript:location.href='shows.php?".
+		"show=$nDir'\">Next</button>";
+	}
+	echo '</div>'.PHP_EOL;
+	echo '</div>'.PHP_EOL;
 		
 }
 $core->createPage("Shows","searchBar","shows.php");
@@ -117,7 +116,7 @@ if(empty($_GET['show']))
 		$show = $dirs[$i];
 		$shows[basename($show)] = array_filter(glob("$show/*"), 'is_dir');
 	}
-	echo '<h1>Shows('.count($shows).')</h1>'.PHP_EOL;	
+	echo '<h1 style="margin-top: 50px;">Shows('.count($shows).')</h1>'.PHP_EOL;	
 	echo '<div style="text-align: center;">'.PHP_EOL;
 	foreach (array_keys($shows) as $showName)
 	{
@@ -159,12 +158,16 @@ else
 	{
 		$show = $_GET['show'];
 		$urlShow = urlencode($_GET['show']);
-		print "<a href=\"shows.php?show=$urlShow\">Back</a><br>"; 
 		$season = $_GET['season'];
 
 		$files = glob("shows/$show/$season/*.{mp4,mkv,avi}",GLOB_BRACE );
 		sort($files, SORT_NATURAL);
 		$season = urlencode($season);
+		echo '<h1 style="margin-top: 50px;">'.$show.'</h1>'.PHP_EOL;
+		echo "<div id=\"musiclist\" onclick='javascript:location.href=\"shows.php?show=$urlShow\"'>".PHP_EOL;
+		echo "Back";
+		echo '</div>';
+		
 		foreach ($files as $episode)
 		{
 			$episode = basename($episode);
@@ -193,13 +196,17 @@ else
 	{
 		$show = $_GET['show'];
 		$urlShow = urlencode($_GET['show']);
-		print "<a href=\"shows.php\">Back</a><br>"; 
 		$dirs = array_filter(glob("shows/$show/*"), 'is_dir');
 		sort($dirs, SORT_NATURAL);
+		echo '<h1 style="margin-top: 50px;">'.$show.'</h1>'.PHP_EOL;
+		echo "<div id=\"musiclist\" onclick='javascript:location.href=\"shows.php\"'>".PHP_EOL;
+		echo "Back";
+		echo '</div>';
 		if(count($dirs) == 0)
 		{
 			$files = glob("shows/$show/*.{mp4,mkv,avi,MP4,MKV,AVI}",GLOB_BRACE );
 			sort($files, SORT_NATURAL);
+
 			foreach ($files as $episode)
 			{
 				$episode = urlencode(basename($episode));
@@ -217,6 +224,7 @@ else
 		}
 		else
 		{
+	
 			foreach ($dirs as $season)
 			{
 				$season = basename($season);

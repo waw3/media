@@ -11,7 +11,7 @@ $movieFiles = array_keys($movieFiles);
 
 ?>
 <?php
-echo '<h1 style="text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">Recently Added</h1>'.PHP_EOL;
+echo '<h1 style="text-shadow: 5px 3px 5px rgba(0,0,0,0.75); margin-top: 50px;">Recently Added</h1>'.PHP_EOL;
 echo '<div id="recentlyAddedWrapper">'.PHP_EOL;
 $num = 15;
 if($num > count($movieFiles))

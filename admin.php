@@ -4,8 +4,7 @@ require "vendor/autoload.php";
 $core = new core();
 $core->startSessionAdmin();
 $con = $core->dbConnect();
-$core->createPage("Admin control panel");
-$core->adminMenu();
+$core->createPage("Admin control panel","adminMenu");
 $msg = "";
 //Changes the user's activated status.
 

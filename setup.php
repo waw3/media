@@ -3,6 +3,10 @@ session_start();
 require "vendor/autoload.php";
 $core = new core();
 $core->createPage("Simple Media Streamer");
+if($_SESSION['group'] == "admin")
+{
+	$core->adminMenu();
+}
 if(file_exists("config/databaseUser.txt"))
 {
 	print "<h2>Setup has already ran, to rerun please delete the databaseUser file.</h2>".PHP_EOL;

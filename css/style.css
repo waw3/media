@@ -1,4 +1,3 @@
-<?php header ("Content-type: text/css"); ?>
 .newUser {
  -webkit-animation: color_change 1s infinite alternate;
  -moz-animation: color_change 1s infinite alternate;
@@ -35,7 +34,7 @@ audio
 }
 body 
 {
-	background-color:#202020;
+	background-color:#404040;
 	margin-top: 0px;
 	margin-bottom: 0px;
 
@@ -48,7 +47,7 @@ html {
 {
 	width: 100%;
 	height: 100%;
-	min-width: 680px;
+	min-width: 765px;
 	position: fixed;
 }
 label
@@ -72,15 +71,11 @@ p
 #main
 {
 	position: relative;
-	margin-top: 50px;
 	right: 8px;
 	width: 100%;
-	height: 95%;
+	height: 100%;
 	background-color:#404040;
 	color: #FFFFFF;
-	-moz-box-shadow: 0 0 5px 5px #404040;
-	-webkit-box-shadow: 0 0 5px 5px #404040;
-	box-shadow: 0 0 5px 5px #404040;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
@@ -112,37 +107,40 @@ p
 }
 #searchbar
 {
+	z-index: 50;
 	display: inline-block;
+	background-color: #101010;
 	position: absolute;
 	max-width: 500px;
-	height: 28px;
+	max-height: 40px;
+	padding-top: 5px;
+	padding-bottom: 5px;
 	right: 20px;
 	padding-left: 6px;
 	padding-right: 6px;
-	margin-top: 5px;
 	-moz-box-shadow: 0 0 10px 2px #FFFFFF;
 	-webkit-box-shadow: 0 0   10px 2px #FFFFFF;
 	box-shadow: 0 0 10px 2px #FFFFFF;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
-	align:center;
 }
 #header
 {
+	z-index: 50;
 	color: #FFFFFF;
-	position: relative;
+	position: absolute;
 	display: inline-block;
 	float: left;
-	margin-top: 5px;
+	margin-left: 0px;
 	padding-right: 5px;
 	padding-left: 5px;
     background-color: #101010;
-    max-width: 700px;
-	height: 28px;
 	-moz-box-shadow: 0 0 10px 2px #FFFFFF;
 	-webkit-box-shadow: 0 0   10px 2px #FFFFFF;
 	box-shadow: 0 0 10px 2px #FFFFFF;
+    max-width: 700px;
+	max-height: 38px;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
@@ -150,17 +148,15 @@ p
 #header2
 {
 	color: #FFFFFF;
+	display: inline-block;
 	position: relative;
-	margin:auto;
-	margin-top: 15px;
+	margin-left: 525px;
+	right: 20px;
 	padding-right: 5px;
 	padding-left: 5px;
     background-color: #101010;
-    max-width: 155px;
+    max-width: 212px;
 	max-height: 35px;
-	-moz-box-shadow: 0 0 10px 2px #FFFFFF;
-	-webkit-box-shadow: 0 0   10px 2px #FFFFFF;
-	box-shadow: 0 0 10px 2px #FFFFFF;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
@@ -251,8 +247,8 @@ ul
 }
 ul li 
 {
-  color: #FFFFFF;
-  font: bold 12px/18px sans-serif;
+  color: #C8C8C8;
+  font: bold 18px/24px sans-serif;
   display: inline-block;
   margin-right: -4px;
   position: relative;
@@ -267,7 +263,7 @@ ul li
 }
 ul li:hover 
 {
-  color: red;
+  color: white;
 }
 .wrapper
 {
@@ -280,10 +276,10 @@ ul li:hover
 #videocontainer
 {
 	display: inline-block;
-	float: left;
 	height: 400px;
 	width: 640px;
-	margin-left: 50px;
+	margin-left: auto;
+	margin-right: auto;
 	text-align: center
 }
 .metadataContainer
@@ -300,10 +296,13 @@ ul li:hover
 }
 #contentWrapper 
 {
+	margin-top: 50px;
+	position: relative;
     width:1000px;
     height:500px;
-    margin: 0 auto;
     text-align:center;
+	margin-left: auto;
+	margin-right: auto;
 }
 #PosterContainer
 {
@@ -371,7 +370,7 @@ ul li:hover
 #recentlyAddedWrapper
 {
     max-width:95%;
-    height:275px;
+    height:285px;
     margin: 0 auto;
 	white-space: nowrap;
 	background-color: #303030;

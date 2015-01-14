@@ -194,7 +194,7 @@ class core
 		else
 		{
 		?>
-			<link href="/media/css/style.php" 
+			<link href="/media/css/style.css" 
 			      rel="stylesheet" type="text/css" />
 		<?php
 		}
@@ -350,11 +350,10 @@ class core
 	{
 	?>
 		<div id="searchbar">
-			<form action ="<?php print $action; ?>" method="post" 
-				style="margin-top: 3px;">
-				<input type="search" id="textfield" name="searchtext"/>
+			<form action ="<?php print $action; ?>" method="post">
+				<input type="search" id="textfield" style="height:24px" name="searchtext"/>
 				<input id="submit" type="submit" value="Search"
-				name="search" style="height: 17px;" />
+				name="search" style="font-size: 16px; margin-left: 5px;" />
 			</form>
 		</div>
 	<?php
@@ -382,7 +381,7 @@ class core
 				"<li onclick=\"javascript:location.href='/media/update.php'\">".
 				"Update</li>". PHP_EOL .
 				"<li ".$this->getClass().
-				"onclick=\"javascript:location.href='/media/admin.php'\">".
+				"onclick=\"javascript:location.href='/media/admin.php?edit=list'\">".
 				"Admin CP</li></ul>" . PHP_EOL;
 			}
 			else
@@ -420,6 +419,7 @@ class core
 		<body>
 		<?php $this->styles(); 
 		?>
+			
 			<div id ="wrapper">
 			<?php if(!$this->isMobile()){ $this->header(); } ?>
 			<?php if(!empty($function)){$this->$function($var);}?>
@@ -500,42 +500,42 @@ class core
 		{
 		
 		?>
-	<script type="text/javascript">
-		var video= videojs('MY_VIDEO_1');
-				
-		video.src("<?php print $videoname."&quality=High&time=0"; ?>");
-		// hack duration
-		video.duration= function() { return video.theDuration; };
-		
-		video.start= 0;
-		video.oldCurrentTime= video.currentTime;
-		video.currentTime= function(time) 
-		{ 
-			if( time == undefined )
-			{
-				return video.oldCurrentTime() + video.start;
-			}
-			console.log(time)
-			video.start= time;
-			video.oldCurrentTime(0);
-			video.src("<?php print $videoname."&quality=High&time=" ?>" 
-			+ Math.trunc(time));
-			video.play();
-			return this;
-		};
-		
-		video.theDuration=<?php print $length; ?>;
-	</script>
-	</video>
+		<script type="text/javascript">
+			var video= videojs('MY_VIDEO_1');
+					
+			video.src("<?php print $videoname; ?>");
+			// hack duration
+			video.duration= function() { return video.theDuration; };
+			
+			video.start= -10;
+			video.oldCurrentTime= video.currentTime;
+			video.currentTime= function(time) 
+			{ 
+				if( time == undefined )
+				{
+					return video.oldCurrentTime() + video.start;
+				}
+				console.log(time)
+				video.start= time;
+				video.oldCurrentTime(0);
+				video.src("<?php print $videoname."&time=" ?>" 
+				+ Math.trunc(time));
+				video.play();
+				return this;
+			};
+			
+			video.theDuration=<?php print $length; ?>;
+		</script>
+		</video>
 		<?php
 		}
 		else
 		{
 		?>
 		<script>
-		var video= videojs('MY_VIDEO_1');
-		video.src("<?php print $videoname; ?>");
-		video.currentTime(0);
+			var video= videojs('MY_VIDEO_1');
+			video.src("<?php print $videoname; ?>");
+			video.currentTime(0);
 		</script>
 		</video>
 		<?php
@@ -606,7 +606,6 @@ class core
 		'(?:HDTV|bluray|WEB-DL|IMAX|EDITION|DTS|DrunkinRG|\w{2,3}rip)'.
 		'|(?:x264)|(?:\d{4})|(?:\d{3,4}p)|nSD|WEB|1-PSY|XviD-LOL|REPACK|DL|(?:AC\d)/i", $var));'));
 		return implode(" ",$tmpArray);
-		
 	}
 }
 ?>
