@@ -41,7 +41,6 @@ substr($_GET["movie"],0,strlen($_GET["movie"])-4)) !== false )
 	$dir = "movies/" . html_entity_decode($_GET['movie']);
 	$core->createPage($plainTextMovieName);
 	$get=true;
-	$title = urlencode($plainTextMovieName);
 	$movieTitle = $movieinfo[1];
 	$movieRating = $movieinfo[2];
 	$moviePlot = $movieinfo[4];
@@ -52,63 +51,69 @@ else
 }
 if($get) //loads the videoplayer if $get is true.
 {
-	$vTranscode = false;
-	$aTranscode = false;
-	$tTranscode = false;
-	$vCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 | grep h264 | grep Stream | wc -l");
-	
-	$aCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 | grep aac | grep Stream | wc -l");
-	if($vCount != 1){ $vTranscode = true; }
-	if($aCount != 1){ $aTranscode = true; }
+	$urldir = $dir;
 	if($type != "mp4") { $tTranscode = true; }
-	$length = "";
-	if($core->getBrowser() == "Firefox" && $tTranscode == 1)
+	if($core->configInfo("bitrate") < $core->movieInfo("$dir","vBitrate"))
 	{
-		$type = "webm";
+		$transcode = true;
+	}
+	else if($core->getBrowser() == "Firefox" && $tTranscode == 1)
+	{
+		$transcode = true;
+	}
+	else if($core->movieInfo("$dir","vCodec") != "h264")
+	{
+		$transcode = true;
+	}
+	else if($core->movieInfo("$dir","aCodec") != "aac")
+	{
+		$transcode = true;
+	}
+	if($transcode)
+	{		
+		$urldir = "transcode.php?media=".urlencode(basename($dir));
 		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
 		$length = explode(":",$length);
 		$length = $length[0]*3600 + $length[1]*60 + $length[2];
-		$dir = "transcode.php?media=".urlencode(basename($dir));
 	}
-	else if($vTranscode)
-	{
-		
-		$type = "mp4";
-		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
-		$length = explode(":",$length);
-		$length = $length[0]*3600 + $length[1]*60 + $length[2];
-		$dir = "transcode.php?media=".urlencode(basename($dir));
-		
-	}
-	else if($aTranscode)
-	{
-		$type = "mp4";
-		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
-		$length = explode(":",$length);
-		$length = $length[0]*3600 + $length[1]*60 + $length[2];
-		$dir = "transcode.php?media=".urlencode(basename($dir));
-	}
-	
+
 	$core->videojsScripts();
 	echo '<div id="contentWrapper">'.PHP_EOL;
 	echo '<div id="videocontainer">'.PHP_EOL;
 	if($movieTitle == "No information") 
 	{ 
-		$movieTitle = $plainTextMovieName; 
+		$movieTitle = $plainTextMovieName;
 	}
 	echo '<p style="margin-bottom: 10px; text-align: center;'.
 	' text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$movieTitle.'</p>'.PHP_EOL;
 	$height = 360;
 	$width = 640;
-	if($core->isMobile()) { $height = 180; $width = 320; }
-	if(!empty($length))
-	{ 
-			$core->videojs($dir, $width, $height, $length);
+	$core->videojs($urldir, $width, $height, $length);
+	
+	$br = $core->configInfo("bitrate");
+	$mBr = $core->movieInfo($dir,"vBitrate");
+	if(!empty($br) && $br < $mBr){$maxBR = $br;}
+	else{$maxBR = $mBr;}
+	?>
+	<select class="list1" onchange="changebr()">
+	<?php
+	for($i = 256; $i <= $maxBR; $i=$i*2)
+	{
+
+	?>
+	<option value="<?php print $i;?>"><?php print $i;?> kbps</option>
+	
+	<?php
+	if($i*2 > $maxBR)
+	{
+	?>
+		<option value="<?php print $maxBR;?>" selected><?php print $maxBR;?> kbps</option>
+	<?php
 	}
-	else
-	{ 
-		$core->videojs($dir, $width, $height); 
 	}
+	?>
+	</select>
+	<?php
 	echo '<p style="text-align: left;'.
 	'text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$moviePlot.'</p>'.PHP_EOL;
 	echo '</div>'.PHP_EOL;

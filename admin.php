@@ -162,8 +162,16 @@ if(isset($_GET['edit']) && $_GET['edit'] == "settings")
 		}
 		if($_POST['val'] == "on"){$sslon = "checked";}
 		else{$ssloff = "checked";}
+		if(is_numeric($_POST['quality']))
+		{
+			$configText['bitrate'] = $_POST['quality'];
+			$bVal = $_POST['quality'];
+		}
+		else if(!empty($_POST['quality']))
+		{
+			$msg .= "<h2>Bitrate has to be a number.</h2> ";
+		}
 		$configText['ssl'] = $_POST['val'];
-		$configText['bitrate'] = $_POST['quality'];
 		$configText = json_encode($configText);
 		$f = fopen("config/config.json", 'w');
 		fwrite($f,$configText);
@@ -176,6 +184,7 @@ if(isset($_GET['edit']) && $_GET['edit'] == "settings")
 			$mVal = str_replace("'", "",$config['movieDir']);
 			$sVal = str_replace("'", "",$config['showDir']);
 			$muVal = str_replace("'", "",$config['musicDir']);
+			$bVal = $config['bitrate'];
 			if($config['ssl'] == "on"){$sslon = "checked";}
 			else{$ssloff = "checked";}
 		}
@@ -197,7 +206,7 @@ if(isset($_GET['edit']) && $_GET['edit'] == "settings")
 	<input id="button" style="background: none;" type="submit" value="Check" 
 	name="muCheck" /></td></tr>
 	<tr><td>Max Bitrate(kbps): </td><td><input type="text" name="quality" 
-	size="4"/></td></tr>
+	size="4" value="<?php print $bVal;?>"/></td></tr>
 	<tr><td>Enable https </td><td><input type="radio" name="val" value="on" <?php print $sslon;?>>On
 	<input type="radio" name="val" value="off" <?php print $ssloff;?>>Off</td>
 	</table>

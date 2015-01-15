@@ -415,11 +415,10 @@ class core
 						initial-scale=1, maximum-scale=1, user-scalable=no">
 			<meta http-equiv="Cache-control" content="public">
 			<meta charset="UTF-8">
+			<?php $this->styles(); ?>
+			<script src="javascript/functions.js"></script>			
 		</head>	
 		<body>
-		<?php $this->styles(); 
-		?>
-			
 			<div id ="wrapper">
 			<?php if(!$this->isMobile()){ $this->header(); } ?>
 			<?php if(!empty($function)){$this->$function($var);}?>
@@ -608,10 +607,41 @@ class core
 		if($config === false){return null;}
 		if(empty($val)){ return json_decode($config, true);}
 		$config = json_decode($config, true);
-		if($val = "ssl"){return $config['ssl'];}
+		if($val == "ssl"){return $config['ssl'];}
 		if($val == "movieDir"){return $config['movieDir'];}
 		if($val == "showDir"){return $config['showDir'];}
 		if($val == "musicDir"){return $config['musicDir'];}
+		if($val == "bitrate"){return $config['bitrate'];}
+		
+	}
+	function movieInfo($dir, $val="")
+	{
+		$dir = escapeshellarg($dir);
+		$cmd = "/usr/local/bin/ffprobe -v quiet -print_format json -show_format -show_streams $dir";
+		$array = json_decode(shell_exec($cmd),true);
+		if(empty($val)){return $array;}
+		if($val == "vBitrate")
+		{
+			if(!empty($array[streams][0]['bit_rate']))
+			{
+				return round($array[streams][0]['bit_rate']/1024,0);
+			}
+			else
+			{
+				if(!empty($array[streams][1]['bit_rate']))
+				{
+					return round(($array[format]['bit_rate']-$array[streams][1]['bit_rate'])/1024,0);
+				}
+				else if(!empty($array[format]['bit_rate']))
+				{
+					return round($array[format]['bit_rate']/1024,0);
+				}
+				else{return $this->configInfo("bitrate");}
+			}
+		}
+		if($val == "aBitrate"){return round($array[streams][1]['bit_rate']/1024,0);}
+		if($val == "vCodec"){return $array[streams][0]['codec_name'];}
+		if($val == "aCodec"){return $array[streams][1]['codec_name'];}
 	}
 }
 ?>

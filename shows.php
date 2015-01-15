@@ -18,30 +18,25 @@ function play($show,$season = "",$episode, &$files)
 	$pIndex--;
 	$type = substr($dir,strlen($dir)-3);
 	$core = new core();
-	$vTranscode = false;
-	$aTranscode = false;
-	$tTranscode = false;
-	$vCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 | grep h264 | grep Stream | wc -l");
-	
-	$aCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 | grep aac | grep Stream | wc -l");
-	if($vCount != 1){ $vTranscode = true; }
-	if($aCount != 1){ $aTranscode = true; }
-	if($type == "mkv") { $type = "mp4"; }
 	if($type != "mp4") { $tTranscode = true; }
-	$length = "";
-	if($vTranscode)
+	if($core->configInfo("bitrate") < $core->movieInfo("$dir","vBitrate"))
 	{
-		
-		$type = "mp4";
-		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
-		$length = explode(":",$length);
-		$length = $length[0]*3600 + $length[1]*60 + $length[2];
-		$dir = "transcode.php?media=".urlencode($dir);
-		
+		$transcode = true;
 	}
-	else if($aTranscode)
+	else if($core->getBrowser() == "Firefox" && $tTranscode == 1)
 	{
-		$type = "mp4";
+		$transcode = true;
+	}
+	else if($core->movieInfo("$dir","vCodec") != "h264")
+	{
+		$transcode = true;
+	}
+	else if($core->movieInfo("$dir","aCodec") != "aac")
+	{
+		$transcode = true;
+	}
+	if($transcode)
+	{
 		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
 		$length = explode(":",$length);
 		$length = $length[0]*3600 + $length[1]*60 + $length[2];

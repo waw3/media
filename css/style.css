@@ -43,6 +43,11 @@ html {
 	font-family: Verdana, Geneva, sans-serif;
 	font-weight: bold;
 }
+.container {
+  width: 150px;
+  margin: 10px auto;
+  padding: 0;
+}
 #wrapper
 {
 	width: 100%;
@@ -479,15 +484,15 @@ ul li:hover
 
 	background-color: #606060;
 }
-a:link {
-    color: white;
+select.list1
+{	
+	border: 0;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+    background-color: grey;
 }
-a:hover {
-    color: red;
-}
-a:visited {
-    color: white;
-}
-a:active {
-    color: red;
+select.list1:focus
+{
+	outline: none;
 }
