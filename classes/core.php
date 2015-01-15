@@ -187,14 +187,14 @@ class core
 		if ($this->isMobile())
 		{ 
 		?>
-			<link href="/media/css/mobilestyle.php" 
+			<link href="css/mobilestyle.php" 
 			      rel="stylesheet" type="text/css" />	
 		<?php
 		}
 		else
 		{
 		?>
-			<link href="/media/css/style.css" 
+			<link href="css/style.css" 
 			      rel="stylesheet" type="text/css" />
 		<?php
 		}
@@ -362,32 +362,32 @@ class core
 	{
 		if(!isset($_SESSION['username'])) 
 		{
-			$options="<li onclick=\"javascript:location.href='/media/login.php'\">".
+			$options="<li onclick=\"javascript:location.href='login.php'\">".
 			"Log in</li>".PHP_EOL .
-			"<li onclick=\"javascript:location.href='/media/register.php'\">".
+			"<li onclick=\"javascript:location.href='register.php'\">".
 			"Register</li></ul>";
 		}
 		else
 		{
-			$options="<li onclick=\"javascript:location.href='/media/logout.php'\">".
+			$options="<li onclick=\"javascript:location.href='logout.php'\">".
 			"Log out</li>". 
-			PHP_EOL . "<li onclick=\"javascript:location.href='/media/movies.php'\">".
+			PHP_EOL . "<li onclick=\"javascript:location.href='movies.php'\">".
 			"Movies</li>".PHP_EOL .
-			"<li onclick=\"javascript:location.href='/media/shows.php'\">".
+			"<li onclick=\"javascript:location.href='shows.php'\">".
 			"Shows</li>".PHP_EOL;
 			if($_SESSION['group'] == "admin")
 			{
 				$options = $options .
-				"<li onclick=\"javascript:location.href='/media/update.php'\">".
+				"<li onclick=\"javascript:location.href='update.php'\">".
 				"Update</li>". PHP_EOL .
 				"<li ".$this->getClass().
-				"onclick=\"javascript:location.href='/media/admin.php?edit=list'\">".
+				"onclick=\"javascript:location.href='admin.php?edit=list'\">".
 				"Admin CP</li></ul>" . PHP_EOL;
 			}
 			else
 			{
 				$options = $options .
-				"<li onclick=\"javascript:location.href='/media/user.php'\">".
+				"<li onclick=\"javascript:location.href='user.php'\">".
 				"User CP</li></ul>". PHP_EOL;
 			}
 		}	
@@ -482,13 +482,8 @@ class core
 		</style>
 	<?php
 	}
-	function videojs($videoname, $width, $height, $type = "", $length = "")
+	function videojs($videoname, $width, $height, $length = "")
 	{
-		if($this->isMobile())
-		{
-			//$width=$width/2;
-			//$height=$height/2;
-		}
 		?>
 		<video id="MY_VIDEO_1" 
 		class="video-js vjs-default-skin vjs-big-play-centered" controls 
@@ -507,7 +502,7 @@ class core
 			// hack duration
 			video.duration= function() { return video.theDuration; };
 			
-			video.start= -10;
+			video.start= 0;
 			video.oldCurrentTime= video.currentTime;
 			video.currentTime= function(time) 
 			{ 

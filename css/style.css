@@ -113,11 +113,8 @@ p
 	position: absolute;
 	max-width: 500px;
 	max-height: 40px;
-	padding-top: 5px;
-	padding-bottom: 5px;
-	right: 20px;
-	padding-left: 6px;
-	padding-right: 6px;
+	padding: 5px;
+	right: 30px;
 	-moz-box-shadow: 0 0 10px 2px #FFFFFF;
 	-webkit-box-shadow: 0 0   10px 2px #FFFFFF;
 	box-shadow: 0 0 10px 2px #FFFFFF;

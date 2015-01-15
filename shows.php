@@ -59,11 +59,11 @@ function play($show,$season = "",$episode, &$files)
 	if($core->isMobile()) { $height = 180; $width = 320; }
 	if(!empty($length))
 	{ 
-		$core->videojs($dir, $width, $height, $type, $length);
+		$core->videojs($dir, $width, $height, $length);
 	}
 	else 
 	{ 
-		$core->videojs($dir, $width, $height, $type); 
+		$core->videojs($dir, $width, $height); 
 	}
 	if(!empty($season))
 	{
@@ -130,7 +130,7 @@ if(empty($_GET['show']))
 				$showName = substr($showName,0,17) . "...";
 			}
 			echo '<div id="PosterContainer" onclick='.
-			'\'javascript:location.href="/media/shows.php?show='
+			'\'javascript:location.href="shows.php?show='
 			.$show.'"\'>'.PHP_EOL;
 			echo '<label style="cursor:pointer; text-shadow: '.
 			'5px 3px 5px rgba(0,0,0,0.75);">'.

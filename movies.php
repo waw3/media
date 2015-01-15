@@ -7,7 +7,14 @@ if($_SERVER['SERVER_PORT'] == '443')
 require "vendor/autoload.php";
 $core = new core();
 $core->startSessionRestricted();
-$files = glob("metadata/movies/*txt");
+if($core->getBrowser() != "Firefox")
+{
+	$files = glob("movies/*.{mp4,mkv,avi,MP4,MKV,AVI}",GLOB_BRACE );
+}
+else
+{
+	$files = glob("movies/*.{mp4,avi,MP4,AVI}",GLOB_BRACE );
+}
 natcasesort($files);
 $get=false;
 //Somebody is searching for a movie.
@@ -53,17 +60,24 @@ if($get) //loads the videoplayer if $get is true.
 	$aCount = shell_exec("/usr/local/bin/ffprobe \"$dir\" 2>&1 | grep aac | grep Stream | wc -l");
 	if($vCount != 1){ $vTranscode = true; }
 	if($aCount != 1){ $aTranscode = true; }
-	if($type == "mkv") { $type = "mp4"; }
 	if($type != "mp4") { $tTranscode = true; }
 	$length = "";
-	if($vTranscode)
+	if($core->getBrowser() == "Firefox" && $tTranscode == 1)
+	{
+		$type = "webm";
+		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
+		$length = explode(":",$length);
+		$length = $length[0]*3600 + $length[1]*60 + $length[2];
+		$dir = "transcode.php?media=".urlencode(basename($dir));
+	}
+	else if($vTranscode)
 	{
 		
 		$type = "mp4";
 		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
 		$length = explode(":",$length);
 		$length = $length[0]*3600 + $length[1]*60 + $length[2];
-		$dir = "transcode.php?media=".basename($dir);
+		$dir = "transcode.php?media=".urlencode(basename($dir));
 		
 	}
 	else if($aTranscode)
@@ -72,7 +86,7 @@ if($get) //loads the videoplayer if $get is true.
 		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
 		$length = explode(":",$length);
 		$length = $length[0]*3600 + $length[1]*60 + $length[2];
-		$dir = "transcode.php?media=".basename($dir);
+		$dir = "transcode.php?media=".urlencode(basename($dir));
 	}
 	
 	$core->videojsScripts();
@@ -89,11 +103,11 @@ if($get) //loads the videoplayer if $get is true.
 	if($core->isMobile()) { $height = 180; $width = 320; }
 	if(!empty($length))
 	{ 
-			$core->videojs($dir, $width, $height, $type, $length);
+			$core->videojs($dir, $width, $height, $length);
 	}
-	else 
+	else
 	{ 
-		$core->videojs($dir, $width, $height, $type); 
+		$core->videojs($dir, $width, $height); 
 	}
 	echo '<p style="text-align: left;'.
 	'text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$moviePlot.'</p>'.PHP_EOL;
@@ -119,23 +133,29 @@ else // if get is false then we load the movie list.
 	foreach($files as $value) 
 	{
 		$value = basename($value);
-		$movieinfo = file_get_contents("metadata/movies/".$value);
-		$movieinfo = explode("\n",$movieinfo);
-		$getvalue = urlencode(substr($value,0,strlen($value)-4).$movieinfo[0]);
-		$title = substr($movieinfo[1],0,strpos($movieinfo[1],"("));
-		$title2 = substr($value,0,strlen($value)-4);
-		
-		if(strlen($title) > 17)
+		$movieinfo = @file_get_contents("metadata/movies/".substr($value,0,strlen($value)-4).".txt");
+		if($movieinfo !== FALSE)
 		{
-			$title = substr($title,0,17) . "...";
+			$movieinfo = explode("\n",$movieinfo);
+			$getvalue = urlencode(substr($value,0,strlen($value)-4).$movieinfo[0]);
+			$title = substr($movieinfo[1],0,strpos($movieinfo[1],"("));
+			$title2 = substr($value,0,strlen($value)-4);
+			
+			if(strlen($title) > 17)
+			{
+				$title = substr($title,0,17) . "...";
+			}
+			if(file_exists("metadata/movies/$title2".".jpeg"))
+			{
+				echo '<div id="PosterContainer" onclick='.
+				'\'javascript:location.href="movies.php?movie='.$getvalue.'"\'>'.PHP_EOL;
+				echo '<label style="cursor:pointer; text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.
+				$title.'</label><br>'.PHP_EOL;
+				echo '<img class="lazy img-responsive" id="posters" alt="'.$title2.
+				'" src="images/holder.jpg" data-original="'."metadata/movies/$title2".'.jpeg" >'.PHP_EOL;
+				echo '</div>'.PHP_EOL;
+			}
 		}
-		echo '<div id="PosterContainer" onclick='.
-		'\'javascript:location.href="/media/movies.php?movie='.$getvalue.'"\'>'.PHP_EOL;
-		echo '<label style="cursor:pointer; text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.
-		$title.'</label><br>'.PHP_EOL;
-		echo '<img class="lazy img-responsive" id="posters" alt="'.$title2.
-		'" src="images/holder.jpg" data-original="'."metadata/movies/$title2".'.jpeg" >'.PHP_EOL;
-		echo '</div>'.PHP_EOL;
 	}
 	echo '</div>'.PHP_EOL;
 }	

@@ -4,7 +4,14 @@ require "vendor/autoload.php";
 $core = new core();
 $core->startSessionRestricted();
 $core->createPage("Simple Media Streamer");
-$movieFiles = glob("movies/*.{mp4,mkv,avi,MP4,MKV,AVI}",GLOB_BRACE );
+if($core->getBrowser() != "Firefox")
+{
+	$movieFiles = glob("movies/*.{mp4,mkv,avi,MP4,MKV,AVI}",GLOB_BRACE );
+}
+else
+{
+	$movieFiles = glob("movies/*.{mp4,avi,MP4,AVI}",GLOB_BRACE );
+}
 $movieFiles = array_combine($movieFiles, array_map("filemtime", $movieFiles));
 arsort($movieFiles);
 $movieFiles = array_keys($movieFiles);
@@ -31,7 +38,7 @@ for($i = 0; $i < $num; $i++)
 		{
 			if(strlen($title) > 17) { $title = substr($title,0,17) . "..."; }
 			if($movieInfo == "No information") { $movieInfo = $title2; }
-			echo '<div id="PosterContainer" style="margin-top: 5px;" onclick=\'javascript:location.href="/media/movies.php?movie='.$getvalue.'"\'>'.PHP_EOL;
+			echo '<div id="PosterContainer" style="margin-top: 5px;" onclick=\'javascript:location.href="movies.php?movie='.$getvalue.'"\'>'.PHP_EOL;
 			echo '<label style="cursor:pointer; text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$title.'</label><br>'.PHP_EOL;
 			echo '<img  id="posters" alt="'.$title2.'" src="'."metadata/movies/$title2".'.jpeg" width="'.$width.'" height="'.$height.'">'.PHP_EOL;
 		}
