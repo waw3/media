@@ -2,6 +2,7 @@
 
 require "vendor/autoload.php";
 $core = new core();
+$core->requireSSL();
 $core->startSessionAdmin();
 $con = $core->dbConnect();
 $core->createPage("Admin control panel","adminMenu");
@@ -86,6 +87,7 @@ if(isset($_GET['edit']) && $_GET['edit'] == "settings")
 	$mVal = $_POST['mDir'];
 	$sVal = $_POST['sDir'];
 	$muVal = $_POST['muDir'];
+	$ssl = $_POST['val'];
 	if(isset($_POST['mCheck']))
 	{
 		if(file_exists($_POST['mDir']))
@@ -158,20 +160,26 @@ if(isset($_GET['edit']) && $_GET['edit'] == "settings")
 		{
 			$msg .= "<h2>".$_POST['muDir']." Directory does not exist</h2> ";
 		}
+		if($_POST['val'] == "on"){$sslon = "checked";}
+		else{$ssloff = "checked";}
+		$configText['ssl'] = $_POST['val'];
+		$configText['bitrate'] = $_POST['quality'];
 		$configText = json_encode($configText);
 		$f = fopen("config/config.json", 'w');
 		fwrite($f,$configText);
 		fclose($f);
 	}
-		$config = file_get_contents("config/config.json");
-		$config = json_decode($config, true);
-		if(!isset($_POST['mCheck']) && !isset($_POST['sCheck']) && !isset($_POST['mCheck']))
+		
+		if(!isset($_POST['mCheck']) && !isset($_POST['sCheck']) && !isset($_POST['mCheck']) && !isset($_POST['val']))
 		{
+			$config = $core->configInfo();
 			$mVal = str_replace("'", "",$config['movieDir']);
 			$sVal = str_replace("'", "",$config['showDir']);
 			$muVal = str_replace("'", "",$config['musicDir']);
-			//$bVal = str_replace("'", "",$config['bitrate']);
+			if($config['ssl'] == "on"){$sslon = "checked";}
+			else{$ssloff = "checked";}
 		}
+		
 ?>
 <center>
 	<div class="tableDiv">
@@ -190,8 +198,8 @@ if(isset($_GET['edit']) && $_GET['edit'] == "settings")
 	name="muCheck" /></td></tr>
 	<tr><td>Max Bitrate(kbps): </td><td><input type="text" name="quality" 
 	size="4"/></td></tr>
-	<tr><td>Enable https </td><td><input type="radio" name="val" value="on">On
-	<input type="radio" name="val" value="off">Off</td>
+	<tr><td>Enable https </td><td><input type="radio" name="val" value="on" <?php print $sslon;?>>On
+	<input type="radio" name="val" value="off" <?php print $ssloff;?>>Off</td>
 	</table>
 	<input id="button" type="submit" value="Submit" name="submit" /><br>
 	<?php print $msg; ?>

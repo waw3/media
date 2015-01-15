@@ -12,9 +12,9 @@ class core
 	// connects to database using the config file.
 	public function dbConnect() 
 	{
-			$dbUser=file_get_contents("config/databaseUser.txt");
-			if($dbUser === FALSE) { header("Location: setup.php"); }
-			$dbUser=explode("\n",$dbUser);
+		$dbUser=file_get_contents("config/databaseUser.txt");
+		if($dbUser === FALSE) { header("Location: setup.php"); }
+		$dbUser=explode("\n",$dbUser);
 
 		try {
 		$con = new PDO("mysql:host=localhost;dbname=$dbUser[2]",
@@ -28,7 +28,7 @@ class core
 	}
 	public function requireSSL()
 	{
-		if($_SERVER['SERVER_PORT'] != '443')
+		if($_SERVER['SERVER_PORT'] != '443' && $this->configInfo("ssl") == "on")
 		{
 			header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
 			exit();
@@ -601,6 +601,17 @@ class core
 		'(?:HDTV|bluray|WEB-DL|IMAX|EDITION|DTS|DrunkinRG|\w{2,3}rip)'.
 		'|(?:x264)|(?:\d{4})|(?:\d{3,4}p)|nSD|WEB|1-PSY|XviD-LOL|REPACK|DL|(?:AC\d)/i", $var));'));
 		return implode(" ",$tmpArray);
+	}
+	function configInfo($val="")
+	{
+		$config = @file_get_contents("config/config.json");
+		if($config === false){return null;}
+		if(empty($val)){ return json_decode($config, true);}
+		$config = json_decode($config, true);
+		if($val = "ssl"){return $config['ssl'];}
+		if($val == "movieDir"){return $config['movieDir'];}
+		if($val == "showDir"){return $config['showDir'];}
+		if($val == "musicDir"){return $config['musicDir'];}
 	}
 }
 ?>
