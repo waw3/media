@@ -44,101 +44,59 @@ substr($_GET["movie"],0,strlen($_GET["movie"])-4)) !== false )
 	$movieTitle = $movieinfo[1];
 	$movieRating = $movieinfo[2];
 	$moviePlot = $movieinfo[4];
-}
-else
-{
-	$core->createPage("Simple Media Streamer","searchBar","movies.php");
-}
-if($get) //loads the videoplayer if $get is true.
-{
-	$urldir = $dir;
-	if($type != "mp4") { $tTranscode = true; }
-	if($core->configInfo("bitrate") < $core->movieInfo("$dir","vBitrate"))
-	{
-		$transcode = true;
-	}
-	else if($core->getBrowser() == "Firefox" && $tTranscode == 1)
-	{
-		$transcode = true;
-	}
-	else if($core->movieInfo("$dir","vCodec") != "h264")
-	{
-		$transcode = true;
-	}
-	else if($core->movieInfo("$dir","aCodec") != "aac")
-	{
-		$transcode = true;
-	}
-	if($transcode)
-	{		
-		$urldir = "transcode.php?media=".urlencode(basename($dir));
-		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
-		$length = explode(":",$length);
-		$length = $length[0]*3600 + $length[1]*60 + $length[2];
-	}
-
-	$core->videojsScripts();
-	echo '<div id="contentWrapper">'.PHP_EOL;
-	echo '<div id="videocontainer">'.PHP_EOL;
-	if($movieTitle == "No information") 
-	{ 
-		$movieTitle = $plainTextMovieName;
-	}
-	echo '<p style="margin-bottom: 10px; text-align: center;'.
-	' text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$movieTitle.'</p>'.PHP_EOL;
-	$height = 360;
-	$width = 640;
-	$core->videojs($urldir, $width, $height, $length);
 	
-	$br = $core->configInfo("bitrate");
-	$mBr = $core->movieInfo($dir,"vBitrate");
-	if(!empty($br) && $br < $mBr){$maxBR = $br;}
-	else{$maxBR = $mBr;}
-	?>
-	<select class="list1" onchange="changebr()">
-	<?php
-	for($i = 256; $i <= $maxBR; $i=$i*2)
-	{
+}
+else{$core->createPage("Simple Media Streamer","searchBar","movies.php");}
 
-	?>
-	<option value="<?php print $i;?>"><?php print $i;?> kbps</option>
+//loads the videoplayer if $get is true.
+if($get) 
+{
+?>
+	<div id="contentWrapper">
+		<div id="videocontainer">
+			<p style="margin-bottom: 10px; text-align: center; 
+			text-shadow: 5px 3px 5px rgba(0,0,0,0.75);"><?php print $movieTitle; ?></p>
+			<?php
+			if(isset($_GET['time']) && is_numeric($_GET['time']) && $_GET['time'] < $core->movieInfo("movies/".$_GET['movie'],"length"))
+			{
+				$core->playVideo($_GET['movie'],$_GET['time']);
+			}
+			else{$core->playVideo($_GET['movie']);}
+
+			
+			?>
+			<p style="text-align: left; text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">
+			<?php print $moviePlot; ?></p>
+		</div>
 	
-	<?php
-	if($i*2 > $maxBR)
-	{
-	?>
-		<option value="<?php print $maxBR;?>" selected><?php print $maxBR;?> kbps</option>
-	<?php
-	}
-	}
-	?>
-	</select>
-	<?php
-	echo '<p style="text-align: left;'.
-	'text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.$moviePlot.'</p>'.PHP_EOL;
-	echo '</div>'.PHP_EOL;
-	echo '<div class="metadataContainer">'.PHP_EOL;
-	$poster = "images/movie";
-	if(file_exists("metadata/movies/$plainTextMovieName.jpeg")) 
-	{ 
-		$poster = "metadata/movies/".$plainTextMovieName;
-	}
-	echo '<img src="'.$poster.'.jpeg"  id="posters" '.
-	'width="'.$width.'" height="'.$height.'">'.PHP_EOL;
-	echo "<p style=\"margin-top: 5px;text-align: center;".
-	"text-shadow: 5px 3px 5px rgba(0,0,0,0.75); \">$movieRating</p>".PHP_EOL;
-	echo '</div>'.PHP_EOL;
-	echo '</div>'.PHP_EOL;	
+		<div class="metadataContainer">
+			<?php
+			$poster = "images/movie";
+			if(file_exists("metadata/movies/$plainTextMovieName.jpeg")) 
+			{ 
+				$poster = "metadata/movies/".$plainTextMovieName;
+			}
+			?>
+			<img src="<?php print $poster.'.jpeg'; ?>"  id="posters" 
+			width="<?php print $width; ?>" height="<?php print $height; ?>">
+			<p style="margin-top: 5px; text-align: center; 
+			text-shadow: 5px 3px 5px rgba(0,0,0,0.75); ">
+			<?php print $movieRating; ?></p>
+			
+		</div>
+	</div>
+<?php	
 } 		
 else // if get is false then we load the movie list.
-{	
-	
-	echo '<h1 style="margin-top: 50px;">Movies('.count($files).')</h1>'.PHP_EOL;	
+{
+	echo '<h1 style="margin-top: 50px;">Movies('.
+	count($files).')</h1>'.PHP_EOL;	
 	echo '<div style="text-align: center;">'.PHP_EOL;				 
 	foreach($files as $value) 
 	{
 		$value = basename($value);
-		$movieinfo = @file_get_contents("metadata/movies/".substr($value,0,strlen($value)-4).".txt");
+		$movieinfo = @file_get_contents("metadata/movies/".
+		substr($value,0,strlen($value)-4).".txt");
 		if($movieinfo !== FALSE)
 		{
 			$movieinfo = explode("\n",$movieinfo);
@@ -153,11 +111,13 @@ else // if get is false then we load the movie list.
 			if(file_exists("metadata/movies/$title2".".jpeg"))
 			{
 				echo '<div id="PosterContainer" onclick='.
-				'\'javascript:location.href="movies.php?movie='.$getvalue.'"\'>'.PHP_EOL;
+				'\'javascript:location.href="movies.php?movie='.
+				$getvalue.'"\'>'.PHP_EOL;
 				echo '<label style="cursor:pointer; text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.
 				$title.'</label><br>'.PHP_EOL;
 				echo '<img class="lazy img-responsive" id="posters" alt="'.$title2.
-				'" src="images/holder.jpg" data-original="'."metadata/movies/$title2".'.jpeg" >'.PHP_EOL;
+				'" src="images/holder.jpg" data-original="'.
+				"metadata/movies/$title2".'.jpeg" >'.PHP_EOL;
 				echo '</div>'.PHP_EOL;
 			}
 		}

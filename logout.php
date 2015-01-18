@@ -7,7 +7,7 @@ if(!isset($_SESSION['username']))
 {
 	header("Location: login.php");
 }
-$msg = '<p style="text-align: center;">You are now logged out</p>';
+$msg = '<p style="text-align: center; margin-top: 20%;">You are now logged out</p>';
 require "vendor/autoload.php";
 $core = new core();
 $core->createPage("Logged Out");

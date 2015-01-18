@@ -147,17 +147,17 @@ class core
 			//sql query to get the information from the database
 			$row = $sqlQuery->select("id username password userGroup activated",
 			"username",$suppliedUser);
-
-			if($row[0]['activated'] == 0){
+			//checking if the password matches.
+			if(password_verify($suppliedPass,$row[0]['password'])) 
+			{
+			if($row[0]['activated'] == 0)
+			{
 				return "<h2>Account isn't active.</h2>";
 			}
 			elseif($row[0]['activated'] == 2)
 			{
 				return "<h2>Account has been banned.</h2>";
 			}
-			//checking if the password matches.
-			if(password_verify($suppliedPass,$row[0]['password'])) 
-			{
 				session_start();
 				$root=$this->cwd();
 				//setting session variables.
@@ -168,9 +168,14 @@ class core
 			} 
 			else
 			{
+				$f = fopen("Logs/access.log",'a');
+				fwrite($f,date('d M Y H:i:s').": User tried to login with username: ".
+				" $suppliedUser and failed. Ip address: ".$_SERVER['REMOTE_ADDR']."\n");
+				fclose($f);
 				 // message that the user didn't have valid information.
 				return "<h2>Invalid username or password.".
 				"<br/>Please try again.</h2>";
+	
 			}
 	}
 	//checks the user agent to see what operating system they are using.
@@ -342,6 +347,10 @@ class core
 		$this->startSessionRestricted();
 		if(!($_SESSION['group'] == "admin")) 
 		{
+			$f = fopen("Logs/access.log",'a');
+			fwrite($f,date('d M Y H:i:s').": ".$_SESSION['username']." tried to access restricted page".
+			" Ip address: ".$_SERVER['REMOTE_ADDR']."\n");
+			fclose($f);
 			$dir=$this->cwd();
 			header("Location: $dir");
 		}
@@ -481,14 +490,26 @@ class core
 		</style>
 	<?php
 	}
-	function videojs($videoname, $width, $height, $length = "")
+	function videojs($videoname, $width, $height, $length = "",$time="")
 	{
+		$video = explode("?media=",$videoname);
+		$video = urldecode($video[1]);
+		if(strpos($video,"&time="))
+		{
+			$video = explode("&time=",$video);
+			$video = $video[0];
+		}
+		if(strpos($video,"&br="))
+		{
+			$video = explode("&br=",$video);
+			$video = $video[0];
+		}
+	
 		?>
-		<video id="MY_VIDEO_1" 
-		class="video-js vjs-default-skin vjs-big-play-centered" controls 
+		<video id="MY_VIDEO_1"
+		class="video-js vjs-default-skin vjs-big-play-centered" controls
 		width="<?php print $width; ?>" 
 		height="<?php print $height; ?>">
-		
 		<?php
 		if(!empty($length))
 		{
@@ -496,12 +517,29 @@ class core
 		?>
 		<script type="text/javascript">
 			var video= videojs('MY_VIDEO_1');
-					
+			var cbitrate = false;
 			video.src("<?php print $videoname; ?>");
+			video.load();
+			setTimeout(function(){
+			video.play();
+			}, 2000);
 			// hack duration
 			video.duration= function() { return video.theDuration; };
-			
+			<?php if(!empty($time))
+			{
+				
+			?>
+			video.start = <?php print $time; ?>;
+			<?php
+			$time = "";
+			}
+			else
+			{
+			?>
 			video.start= 0;
+			<?php
+			}
+			?>
 			video.oldCurrentTime= video.currentTime;
 			video.currentTime= function(time) 
 			{ 
@@ -509,16 +547,23 @@ class core
 				{
 					return video.oldCurrentTime() + video.start;
 				}
-				console.log(time)
-				video.start= time;
 				video.oldCurrentTime(0);
-				video.src("<?php print $videoname."&time=" ?>" 
-				+ Math.trunc(time));
+				video.start = time;
+				$.get( "time.php", { media: "<?php print $video;?>", 
+				time: Math.trunc(time) } );
+				playvideo("<?php print $videoname."&time="; ?>" + Math.trunc(time));
+				video.load()
+				//since the transcoding is real time a little buffer is nice.
+				setTimeout(function(){
 				video.play();
+				}, 2000);
 				return this;
 			};
-			
 			video.theDuration=<?php print $length; ?>;
+			setInterval(function() {
+			$.get( "time.php", { media: "<?php print $video;?>",
+			time: Math.trunc(video.currentTime()) } );
+			}, 30000);
 		</script>
 		</video>
 		<?php
@@ -551,7 +596,7 @@ class core
 	function getBrowser() 
 	{ 
 		$u_agent=$_SERVER['HTTP_USER_AGENT'];   
-		if(preg_match('/MSIE/i',$u_agent) && !preg_match('/Opera/i',$u_agent))
+		if(preg_match('/Trident/i',$u_agent))
 		{
 			return "MSIE"; 
 		}
@@ -642,6 +687,68 @@ class core
 		if($val == "aBitrate"){return round($array[streams][1]['bit_rate']/1024,0);}
 		if($val == "vCodec"){return $array[streams][0]['codec_name'];}
 		if($val == "aCodec"){return $array[streams][1]['codec_name'];}
+		if($val == "length")
+		{
+			return $array[format]['duration'];
+		}
+		if($val == "size")
+		{
+			$cmd = "ls -l  $dir | awk '{print $5}'";
+			return shell_exec($cmd);
+		}
+	}
+	function playVideo($dir,$time="",$bitrate="")
+	{
+	
+		if(strpos($dir,"shows") === false)
+		{
+			$dir = "movies/" . html_entity_decode($dir);
+		}
+		if(!empty($time) && !empty($bitrate))
+		{
+			$urldir = "transcode.php?media=".urlencode($dir)."&time=".$time."&br=".$bitrate;
+		}
+		else if(!empty($time))
+		{
+			$urldir = "transcode.php?media=".urlencode($dir)."&time=".$time;
+		}
+		else if (!empty($bitrate))
+		{
+			$urldir = "transcode.php?media=".urlencode($dir)."&br=".$bitrate;
+		}
+		else
+		{
+			$urldir = "transcode.php?media=".urlencode($dir);
+		}
+		$length = $this->movieInfo($dir,"length");
+		$this->videojsScripts();
+		$br = $this->configInfo("bitrate");
+		$mBr = $this->movieInfo($dir,"vBitrate");
+		if(!empty($br) && $br <= $mBr){$maxBR = $br;}
+		else{$maxBR = $mBr;}
+		?>
+		<select class="list1" onchange="changebr(<?php print $this->movieInfo($dir,"length");?>)">
+		<?php
+		for($i = 256; $i <= $maxBR; $i=$i*2)
+		{
+			if($i < $maxBR)
+			{
+			?>
+			<option value="<?php print $i;?>"><?php print $i;?> kbps</option>
+			<?php
+			}
+			if($i*2 > $maxBR || $i == $maxBR)
+			{
+			?>
+				<option value="<?php print $maxBR;?>" selected><?php print $maxBR;?> kbps</option>
+			<?php
+			}	
+		}
+		?>
+		</select>
+		<br>
+		<?php
+		$this->videojs($urldir, 640, 360, $length,$time);
 	}
 }
 ?>

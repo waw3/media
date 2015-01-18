@@ -1,29 +1,35 @@
-function changebr()
+function changebr(length)
 {
 	var v = document.getElementsByClassName("list1")[0];
 	var selectedValue = v.options[v.selectedIndex].value;
-	var video = videojs('MY_VIDEO_1');
 	var source = video.currentSrc();
 	var split = source.split("&");
-	if(split[0].indexOf("transcode.php") > -1)
+	newsource = split[0]+"&br="+selectedValue+"&time="+Math.trunc(video.currentTime());
+	playvideo(newsource);
+	cbitrate = true;
+}
+function playvideo(source)
+{
+	if(cbitrate == true)
 	{
-		var newsource = split[0]+"&time="+Math.trunc(video.currentTime())+"&br="+selectedValue;
-	}
-	else
-	{
-		var source2 = decodeURIComponent(source);
-		if(source2.indexOf("show") > -1)
+		if(source.indexOf("&br=") > -1)
 		{
-			var source3 = source2.split("/shows/");
-			var newsource = "transcode.php?media="+encodeURIComponent(source3[1])+"&time="+Math.trunc(video.currentTime())+"&br="+selectedValue;
+			video.src(source);
 		}
 		else
 		{
-			var source3 = source2.split("/movies/");
-			var newsource = "transcode.php?media="+encodeURIComponent(source3[1])+"&time="+Math.trunc(video.currentTime())+"&br="+selectedValue;
+			var oldsource = video.currentSrc();
+			var source2 = oldsource.split("&time=");
+			var source3 = source.split("&time=");
+			video.src(source2[0]+"&time="+source3[1]);
 		}
 	}
-	video.src(newsource);
+	else
+	{
+		video.src(source);
+	}
 	video.load();
+	setTimeout(function(){
 	video.play();
+	}, 3000);
 }

@@ -1,4 +1,9 @@
 <?php
+if($_SERVER['SERVER_PORT'] == '443') 
+{ 
+	header('Location: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+	exit();
+}
 require "vendor/autoload.php";
 $core = new core();
 $core->startSessionRestricted();
@@ -16,50 +21,6 @@ function play($show,$season = "",$episode, &$files)
 	$nIndex = $pIndex = array_search($dir,$files);
 	$nIndex++;
 	$pIndex--;
-	$type = substr($dir,strlen($dir)-3);
-	$core = new core();
-	if($type != "mp4") { $tTranscode = true; }
-	if($core->configInfo("bitrate") < $core->movieInfo("$dir","vBitrate"))
-	{
-		$transcode = true;
-	}
-	else if($core->getBrowser() == "Firefox" && $tTranscode == 1)
-	{
-		$transcode = true;
-	}
-	else if($core->movieInfo("$dir","vCodec") != "h264")
-	{
-		$transcode = true;
-	}
-	else if($core->movieInfo("$dir","aCodec") != "aac")
-	{
-		$transcode = true;
-	}
-	if($transcode)
-	{
-		$length = shell_exec("/usr/local/bin/ffmpeg -i \"$dir\" 2>&1 | grep Duration | awk '{print $2}' | sed 's/...,//'");
-		$length = explode(":",$length);
-		$length = $length[0]*3600 + $length[1]*60 + $length[2];
-		$dir = "transcode.php?media=".urlencode($dir);
-	}
-	$core->videojsScripts();
-	echo '<div id="contentWrapper">'.PHP_EOL;
-	echo '<div id="videocontainer">'.PHP_EOL;
-	$height = 360;
-	$width = 640;
-	echo '<p style="margin-bottom: 10px; text-align: center;'.
-	' text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">'.
-	$core->clean(substr($_GET['episode'],0,
-	strlen($_GET['episode'])-4)).'</p>'.PHP_EOL;
-	if($core->isMobile()) { $height = 180; $width = 320; }
-	if(!empty($length))
-	{ 
-		$core->videojs($dir, $width, $height, $length);
-	}
-	else 
-	{ 
-		$core->videojs($dir, $width, $height); 
-	}
 	if(!empty($season))
 	{
 		$episode = basename($files[$pIndex]);
@@ -74,7 +35,14 @@ function play($show,$season = "",$episode, &$files)
 		$pDir = urlencode($show)."&episode=".urlencode(basename($files[$pIndex]));
 		$nDir = urlencode($show)."&episode=".urlencode(basename($files[$nIndex]));
 	}
-	$dir = urlencode($dir);
+	$core = new core();
+	?>
+	<div id="contentWrapper">
+		<div id="videocontainer">
+			<p style="margin-bottom: 10px; text-align: center; 
+			text-shadow: 5px 3px 5px rgba(0,0,0,0.75);"><?php print $core->clean(substr($_GET['episode'],0,strlen($_GET['episode'])-4)); ?></p>
+			<?php $core->playVideo($dir);?>
+<?php
 	if($pIndex >= 0)
 	{
 		print "<button type=\"button\" id=\"button\" style=\"background:".
