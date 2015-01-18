@@ -746,7 +746,6 @@ class core
 		}
 		?>
 		</select>
-		<br>
 		<?php
 		$this->videojs($urldir, 640, 360, $length,$time);
 	}

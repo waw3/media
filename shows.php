@@ -38,9 +38,9 @@ function play($show,$season = "",$episode, &$files)
 	$core = new core();
 	?>
 	<div id="contentWrapper">
-		<div id="videocontainer">
-			<p style="margin-bottom: 10px; text-align: center; 
-			text-shadow: 5px 3px 5px rgba(0,0,0,0.75);"><?php print $core->clean(substr($_GET['episode'],0,strlen($_GET['episode'])-4)); ?></p>
+		<div id="videocontainer" style="margin-top: 50px;">
+			<text style="position: relative; bottom: 5px; left: 45px;
+			text-shadow: 5px 3px 5px rgba(0,0,0,0.75);"><?php print $core->clean(substr($_GET['episode'],0,strlen($_GET['episode'])-4)); ?></text>
 			<?php $core->playVideo($dir);?>
 <?php
 	if($pIndex >= 0)

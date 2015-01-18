@@ -366,7 +366,7 @@ ul li:hover
 #recentlyAddedWrapper
 {
     max-width:95%;
-    height:275px;
+    height:290px;
     margin: 0 auto;
 	white-space: nowrap;
 	background-color: #303030;
@@ -489,9 +489,11 @@ select.list1
     background-color: grey;
 	float: right;
 	z-index: 55;
+	width: 90px;
 }
 select.list1:focus
 {
+	
 	outline: none;
 }
 progress                        

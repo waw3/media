@@ -52,10 +52,10 @@ else{$core->createPage("Simple Media Streamer","searchBar","movies.php");}
 if($get) 
 {
 ?>
-	<div id="contentWrapper">
-		<div id="videocontainer">
-			<p style="margin-bottom: 10px; text-align: center; 
-			text-shadow: 5px 3px 5px rgba(0,0,0,0.75);"><?php print $movieTitle; ?></p>
+	<div id="contentWrapper" >
+		<div id="videocontainer" style="margin-top: 50px;">
+			<text style="position: relative; bottom: 5px; left: 45px;
+			text-shadow: 5px 3px 5px rgba(0,0,0,0.75);"><?php print $movieTitle; ?></text>
 			<?php
 			if(isset($_GET['time']) && is_numeric($_GET['time']) && $_GET['time'] < $core->movieInfo("movies/".$_GET['movie'],"length"))
 			{
