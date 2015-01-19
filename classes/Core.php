@@ -141,7 +141,7 @@ class Core
 		else { return "<h2>Passwords do not match.</h2>"; }
 		return "<h3>Password was successfully changed.</h3>";
 	}
-	public function login($suppliedUser, $suppliedPass)
+	public function login($suppliedUser, $suppliedPass, $return="")
 	{
 			$sqlQuery = new sql("users", $this->dbConnect());
 			//sql query to get the information from the database
@@ -164,7 +164,11 @@ class Core
 				$_SESSION['username']=$row[0]['username'];
 				$_SESSION['activity']=time();
 				$_SESSION['group']=$row[0]['userGroup'];
-				header("Location: $root ");
+				if(!empty($return) && file_exists($_SERVER[DOCUMENT_ROOT].$return))
+				{
+					header("Location: $return");
+				}
+				else{header("Location: $root ");}
 			} 
 			else
 			{
@@ -295,15 +299,16 @@ class Core
 		session_start();
 		$dir=$this->cwd();
 		$difference=time() - $_SESSION['activity'];
+		$url = $dir."/login.php?return=".urlencode($_SERVER[REQUEST_URI]);
 		if(!isset($_SESSION['username']))
 		{
-			header("Location: $dir/login.php");
+			header("Location: $url");
 		}
 		else if($difference > 86400)
 		{
 			unset($_SESSION);
 			session_destroy();
-			header("Location: $dir/login.php");
+			header("Location: $url");
 		}
 		else
 		{

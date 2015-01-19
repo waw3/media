@@ -41,7 +41,7 @@ function hideCurrent()
 		for (var i = 1; i < elements.length; i++){
 		elements[i].style.display = "none";
 		}
-		$("#recentlyAddedWrapper").animate({width: "0px"}, 500);
+		$("#recentlyAddedWrapper").animate({width: "0%"}, 500);
 		setTimeout(function(){
 		elements[0].style.display = "none";
 		document.getElementById("recentlyAddedWrapper").style.display = "none";
@@ -80,7 +80,7 @@ function hideRecentM()
 		for (var i = 1; i < elements.length; i++){
 		elements[i].style.display = "none";
 		}
-		$("#recentlyAddedMovies").animate({width: "0px"}, 500);
+		$("#recentlyAddedMovies").animate({width: "0%"}, 500);
 		setTimeout(function(){
 		elements[0].style.display = "none";
 		document.getElementById("recentlyAddedMovies").style.display = "none";
@@ -102,5 +102,5 @@ function hideRecentM()
 }
 function scrollX(element,p)
 {
-	$(element).animate( { scrollLeft: '+='+p }, 500);
+	$(element).animate( { scrollLeft: '+='+p }, 200);
 }
