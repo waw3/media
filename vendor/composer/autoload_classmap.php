@@ -6,7 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'core' => $baseDir . '/classes/core.php',
-    'sql' => $baseDir . '/classes/sqlStatement.php',
-    'template' => $baseDir . '/classes/template.php',
+    'Core' => $baseDir . '/classes/Core.php',
+    'Media' => $baseDir . '/classes/Media.php',
+    'sql' => $baseDir . '/classes/SQLQuery.php',
 );

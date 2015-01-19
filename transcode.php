@@ -1,26 +1,26 @@
 <?php
 require "vendor/autoload.php";
-$core = new core();
+$Core = new Core();
 //getting global bitrate setting.
-$globalBR = $core->configInfo("bitrate");
+$globalBR = Media::configInfo("bitrate");
 
-$rString = $core->get_random_string(10);
+$rString = Media::get_random_string(10);
 $media = $_GET['media'];
 
 //checking time to start transcoding.
 if(!empty($_GET['time'])){$time = escapeshellarg($_GET['time']);}
 else { $time = 0; }
 //getting media bitrate info.
-$movieRate = $core->movieInfo($media,"vBitrate");
+$movieRate = Media::movieInfo($media,"vBitrate");
 
 //checking if it should be transcoded.
 
-if($core->getBrowser() == "Firefox"){$transcode = true;}
+if($Core->getBrowser() == "Firefox"){$transcode = true;}
 else if($globalBR < $movieRate){$transcode = true;}
 else if(isset($_GET['br'])){$transcode = true;}
-else if($core->movieInfo($media,"vCodec") != "h264"){$transcode = true;}
-else if($core->movieInfo($media,"aCodec") != "aac"){$transcode = true;}
-header('Content-Length: '.$core->movieInfo($media,"size"));
+else if(Media::movieInfo($media,"vCodec") != "h264"){$transcode = true;}
+else if(Media::movieInfo($media,"aCodec") != "aac"){$transcode = true;}
+header('Content-Length: '.Media::movieInfo($media,"size"));
 $media = escapeshellarg($media);
 
 if($transcode)
@@ -46,7 +46,7 @@ if($transcode)
 	header('Content-type: video/webm');
 	header('Content-Disposition: attachment; filename="'.$rString.'.webm"');
 	//Using ffmpeg from the settings above. This is using the webm container.
-	if($core->getBrowser() == "Firefox" || $core->getBrowser() == "MSIE" ){$cmd = "/usr/local/bin/ffmpeg -ss $time -re ";}
+	if($Core->getBrowser() == "Firefox" || $Core->getBrowser() == "MSIE" ){$cmd = "/usr/local/bin/ffmpeg -ss $time -re ";}
 	else{$cmd = "/usr/local/bin/ffmpeg -ss $time -re ";}
 	$cmd .= " -i $media -c:v libvpx -vf \"format=yuv420p\"".
 	" -cpu-used 5 -acodec libvorbis $bitrate $scale -threads $threads  -f webm -";

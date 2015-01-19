@@ -33,3 +33,74 @@ function playvideo(source)
 	video.play();
 	}, 3000);
 }
+function hideCurrent()
+{
+	if(document.getElementById("recentlyAddedWrapper").style.display != "none")
+	{
+		var elements = document.getElementsByClassName('currentlyWatching');
+		for (var i = 1; i < elements.length; i++){
+		elements[i].style.display = "none";
+		}
+		$("#recentlyAddedWrapper").animate({width: "0px"}, 500);
+		setTimeout(function(){
+		elements[0].style.display = "none";
+		document.getElementById("recentlyAddedWrapper").style.display = "none";
+		var elements2 = document.getElementsByClassName('recentMovies');
+		for (var i = 1; i < elements2.length; i++){
+		elements2[i].style.top = "88px";
+		}
+		},600);
+		
+		
+	}
+	else
+	{
+		var elements = document.getElementsByClassName('currentlyWatching');
+		elements[0].style.display = "block";
+		document.getElementById("recentlyAddedWrapper").style.display = "block";
+		$("#recentlyAddedWrapper").animate({width: "100%"}, 500);
+		setTimeout(function(){
+		for (var i = 1; i < elements.length; i++){
+		elements[i].style.display = "block";	
+		}
+		},600);
+		var elements2 = document.getElementsByClassName('recentMovies');
+		for (var i = 1; i < elements2.length; i++){
+		elements2[i].style.top = "472px";
+		}
+
+	}
+	
+}
+function hideRecentM()
+{
+	if(document.getElementById("recentlyAddedMovies").style.display != "none")
+	{
+		var elements = document.getElementsByClassName('recentMovies');
+		for (var i = 1; i < elements.length; i++){
+		elements[i].style.display = "none";
+		}
+		$("#recentlyAddedMovies").animate({width: "0px"}, 500);
+		setTimeout(function(){
+		elements[0].style.display = "none";
+		document.getElementById("recentlyAddedMovies").style.display = "none";
+		},600);
+	}
+	else
+	{
+		var elements = document.getElementsByClassName('recentMovies');
+		elements[0].style.display = "block";
+		document.getElementById("recentlyAddedMovies").style.display = "block";
+		$("#recentlyAddedMovies").animate({width: "100%"}, 500);
+		setTimeout(function(){
+		for (var i = 1; i < elements.length; i++){
+		elements[i].style.display = "block";
+		}
+		},600);
+
+	}
+}
+function scrollX(element,p)
+{
+	$(element).animate( { scrollLeft: '+='+p }, 500);
+}

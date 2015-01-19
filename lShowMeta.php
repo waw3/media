@@ -3,7 +3,6 @@ function metadata($num)
 {
 	require "template.php"; 
 	$template = new template();
-	$f = fopen("Logs/addedShows.log", 'a');
 	ini_set("max_execution_time", 1800);
 	$files = $dirs = array_filter(glob("shows/*"), 'is_dir');
 	$fCount = (int)(count($files) / 16);
@@ -45,13 +44,8 @@ function metadata($num)
 					$id = $results->results[0]->id;
 					$json = file_get_contents("https://api.themoviedb.org/3/tv/$id?api_key=4562bc01bb2592ec113b813da74a0f58&append_to_response=releases");
 					$results = json_decode($json, true);
-					fwrite($f,$name.$type."\n");
 				}	
 			}
 	}
-	fclose($f);
-	$lines = file('Logs/addedShows.log');
-	$lines = array_unique($lines);
-	file_put_contents('Logs/addedShows.log', implode($lines));
 }
 ?>

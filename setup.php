@@ -1,16 +1,16 @@
 <?php 
 session_start();
 require "vendor/autoload.php";
-$core = new core();
-$core->createPage("Simple Media Streamer");
+$Core = new Core();
+$Core->createPage("Simple Media Streamer");
 if($_SESSION['group'] == "admin")
 {
-	$core->adminMenu();
+	$Core->adminMenu();
 }
 if(file_exists("config/databaseUser.txt"))
 {
 	print "<h2>Setup has already ran, to rerun please delete the databaseUser file.</h2>".PHP_EOL;
-	$core->endPage();
+	$Core->endPage();
 	exit();
 }
 if(!empty($_POST['username']))
@@ -19,7 +19,7 @@ if(!empty($_POST['username']))
 	{
 		echo "<h2>Database root user needs password.</h2>".PHP_EOL;
 	}
-	echo $core->setup($_POST['username'],$_POST['password']);
+	echo $Core->setup($_POST['username'],$_POST['password']);
 }
 ?>
 <h1>Setup Database</h1>
@@ -28,4 +28,4 @@ if(!empty($_POST['username']))
 	<p>MySQL password: <input type="password" name="password" required/></p>
 	<input id="button" type="submit" value="Setup" name="submit" /><br>
 </form>
-<?php $core->endPage(); ?>
+<?php $Core->endPage(); ?>

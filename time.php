@@ -1,7 +1,7 @@
 <?php
 require "vendor/autoload.php";
-$core = new core();
-$core->startSessionRestricted();
+$Core = new Core();
+$Core->startSessionRestricted();
 if(empty($_SESSION['username'])){exit();}
 if($_GET['time'] <= 0){exit();}
 if(!(isset($_GET['media']) && 
@@ -24,7 +24,7 @@ if($cw !== false)
 if(strpos($media,"movies") !== false){$value = 780;}
 else{$value = 60;}
 
-if(($_GET['time']+$value) > $core->movieInfo($media,"length"))
+if(($_GET['time']+$value) > Media::movieInfo($media,"length"))
 {
 	if(isset($cw["$media"]))
 	{	
@@ -36,8 +36,10 @@ if(($_GET['time']+$value) > $core->movieInfo($media,"length"))
 }
 else
 {
+	unset($cw["$media"]);
 	$cw["$media"] = array( "0" => $_GET['time'], 
-	"1" => $core->movieInfo($media,"length"));
+	"1" => Media::movieInfo($media,"length"));
+	$cw = array_filter($cw);
 	file_put_contents("Logs/".$_SESSION['username'].
 	"_cw.json",json_encode($cw));
 }

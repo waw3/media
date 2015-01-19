@@ -5,9 +5,9 @@ if($_SERVER['SERVER_PORT'] == '443')
 	exit();
 }
 require "vendor/autoload.php";
-$core = new core();
-$core->startSessionRestricted();
-if($core->getBrowser() != "Firefox")
+$Core = new Core();
+$Core->startSessionRestricted();
+if($Core->getBrowser() != "Firefox")
 {
 	$files = glob("movies/*.{mp4,mkv,avi,MP4,MKV,AVI}",GLOB_BRACE );
 }
@@ -39,14 +39,14 @@ substr($_GET["movie"],0,strlen($_GET["movie"])-4)) !== false )
 	$movieinfo = file_get_contents("metadata/movies/".$plainTextMovieName.".txt");
 	$movieinfo = explode("\n",$movieinfo);
 	$dir = "movies/" . html_entity_decode($_GET['movie']);
-	$core->createPage($plainTextMovieName);
+	$Core->createPage($plainTextMovieName);
 	$get=true;
 	$movieTitle = $movieinfo[1];
 	$movieRating = $movieinfo[2];
 	$moviePlot = $movieinfo[4];
 	
 }
-else{$core->createPage("Simple Media Streamer","searchBar","movies.php");}
+else{$Core->createPage("Simple Media Streamer","searchBar","movies.php");}
 
 //loads the videoplayer if $get is true.
 if($get) 
@@ -57,11 +57,11 @@ if($get)
 			<text style="position: relative; bottom: 5px; left: 45px;
 			text-shadow: 5px 3px 5px rgba(0,0,0,0.75);"><?php print $movieTitle; ?></text>
 			<?php
-			if(isset($_GET['time']) && is_numeric($_GET['time']) && $_GET['time'] < $core->movieInfo("movies/".$_GET['movie'],"length"))
+			if(isset($_GET['time']) && is_numeric($_GET['time']) && $_GET['time'] < Media::movieInfo("movies/".$_GET['movie'],"length"))
 			{
-				$core->playVideo($_GET['movie'],$_GET['time']);
+				Media::playVideo($_GET['movie'],$_GET['time']);
 			}
-			else{$core->playVideo($_GET['movie']);}
+			else{Media::playVideo($_GET['movie']);}
 
 			
 			?>
@@ -124,5 +124,5 @@ else // if get is false then we load the movie list.
 	}
 	echo '</div>'.PHP_EOL;
 }	
-$core->endPage("lazyload"); 
+$Core->endPage("lazyload"); 
 ?>

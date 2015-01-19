@@ -1,18 +1,18 @@
 <?php 
 
 require "vendor/autoload.php";
-$core = new core();
-$core->requireSSL();
-$core->startSessionAdmin();
-$con = $core->dbConnect();
-$core->createPage("Admin control panel","adminMenu");
+$Core = new Core();
+$Core->requireSSL();
+$Core->startSessionAdmin();
+$con = $Core->dbConnect();
+$Core->createPage("Admin control panel","adminMenu");
 $msg = "";
 //Changes the user's activated status.
 
 if(!empty($_POST['update']))
 {
 	$user = $_GET['edituser'];
-	$sqlQuery = new sql("users", $core->dbConnect());
+	$sqlQuery = new sql("users", $Core->dbConnect());
 	$col = array();
 	$vars = array();
 	if($_POST['nPass'] != $_POST['cPass'])
@@ -58,7 +58,7 @@ if(!empty($_POST['status']))
 {
 
 	$user = $_GET['edituser'];
-	$sqlQuery = new sql("users", $core->dbConnect());
+	$sqlQuery = new sql("users", $Core->dbConnect());
 	$row = $sqlQuery->select("id username userGroup","username",$user);
 	$username = $row[0]['username'];
 	$group = $row[0]['userGroup'];
@@ -180,7 +180,7 @@ if(isset($_GET['edit']) && $_GET['edit'] == "settings")
 		
 		if(!isset($_POST['mCheck']) && !isset($_POST['sCheck']) && !isset($_POST['mCheck']) && !isset($_POST['val']))
 		{
-			$config = $core->configInfo();
+			$config = $Core->configInfo();
 			$mVal = str_replace("'", "",$config['movieDir']);
 			$sVal = str_replace("'", "",$config['showDir']);
 			$muVal = str_replace("'", "",$config['musicDir']);
@@ -268,7 +268,7 @@ else if(isset($_GET['edit']) && $_GET['edit'] == "list")
 }
 else if(!empty($_GET['edituser']))
 {
-	$con = $core->dbConnect();
+	$con = $Core->dbConnect();
 	$sqlQuery = new sql("users",$con);
 	$username = $_GET['edituser'];
 	$row = $sqlQuery->select("ID username firstname lastname regdate".
@@ -333,4 +333,4 @@ else if(!empty($_GET['edituser']))
 <?php
 }
 //Shows the list of currently registered users.
-$core->endPage(); ?>
+$Core->endPage(); ?>

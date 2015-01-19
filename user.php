@@ -1,15 +1,15 @@
 <?php 
 require "vendor/autoload.php";
-$core = new core();
-$core->requireSSL();
-$core->startSessionRestricted();
-$con = $core->dbConnect();
+$Core = new Core();
+$Core->requireSSL();
+$Core->startSessionRestricted();
+$con = $Core->dbConnect();
 $username = $_SESSION['username'];
 if(!empty($_POST['change']))
 {
-	$msg = $core->changePassword($username,$_POST['nPass'],$_POST['cPass'],$_POST['oPass']);
+	$msg = $Core->changePassword($username,$_POST['nPass'],$_POST['cPass'],$_POST['oPass']);
 }
-$core->createPage("User control panel");
+$Core->createPage("User control panel");
 
 $sql="SELECT ID, username, firstname, lastname, regdate, userGroup , activated FROM users WHERE username = ?";
 $query = $con->prepare($sql);
@@ -43,4 +43,4 @@ if(!empty($row))
 <?php print $msg; ?>
 </div>
 	<?php
-$core->endPage(); ?>
+$Core->endPage(); ?>

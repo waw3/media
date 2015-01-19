@@ -9,10 +9,10 @@ if(!isset($_SESSION['username']))
 }
 $msg = '<p style="text-align: center; margin-top: 20%;">You are now logged out</p>';
 require "vendor/autoload.php";
-$core = new core();
-$core->createPage("Logged Out");
+$Core = new Core();
+$Core->createPage("Logged Out");
 ?>
 <?php print $msg; ?>
 <p style="text-align: center;">
-<a href="<?php print $core->cwd(); ?>">Click here</a> to return home</p>
-<?php $core->endPage(); ?>
+<a href="<?php print $Core->cwd(); ?>">Click here</a> to return home</p>
+<?php $Core->endPage(); ?>

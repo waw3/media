@@ -5,8 +5,8 @@ if($_SERVER['SERVER_PORT'] == '443')
 	exit();
 }
 require "vendor/autoload.php";
-$core = new core();
-$core->startSessionRestricted();
+$Core = new Core();
+$Core->startSessionRestricted();
 function play($show,$season = "",$episode, &$files)
 {
 	if(!empty($season))
@@ -35,13 +35,14 @@ function play($show,$season = "",$episode, &$files)
 		$pDir = urlencode($show)."&episode=".urlencode(basename($files[$pIndex]));
 		$nDir = urlencode($show)."&episode=".urlencode(basename($files[$nIndex]));
 	}
-	$core = new core();
+	$Core = new Core();
+	$Media = new Media();
 	?>
 	<div id="contentWrapper">
 		<div id="videocontainer" style="margin-top: 50px;">
 			<text style="position: relative; bottom: 5px; left: 45px;
-			text-shadow: 5px 3px 5px rgba(0,0,0,0.75);"><?php print $core->clean(substr($_GET['episode'],0,strlen($_GET['episode'])-4)); ?></text>
-			<?php $core->playVideo($dir);?>
+			text-shadow: 5px 3px 5px rgba(0,0,0,0.75);"><?php print Media::clean(substr($_GET['episode'],0,strlen($_GET['episode'])-4)); ?></text>
+			<?php $Media->playVideo($dir);?>
 <?php
 	if($pIndex >= 0)
 	{
@@ -59,7 +60,7 @@ function play($show,$season = "",$episode, &$files)
 	echo '</div>'.PHP_EOL;
 		
 }
-$core->createPage("Shows","searchBar","shows.php");
+$Core->createPage("Shows","searchBar","shows.php");
 if(empty($_GET['show']))
 {
 	$dirs = array_filter(glob('shows/*'), 'is_dir');
@@ -87,7 +88,7 @@ if(empty($_GET['show']))
 		{
 			$fileName = $showName;
 			$show = urlencode($showName);
-			$showName = $core->clean($showName, "dir");
+			$showName = Media::clean($showName, "dir");
 			if(strlen($showName) > 17)
 			{
 				$showName = substr($showName,0,17) . "...";
@@ -135,7 +136,7 @@ else
 		{
 			$episode = basename($episode);
 			$type = substr($_GET['episode'],strlen($_GET['episode'])-4);
-			$name = $core->clean($episode);
+			$name = Media::clean($episode);
 			$urlEpisode = urlencode($episode.$type);
 			if(strlen($name) > 50)
 			{
@@ -173,7 +174,7 @@ else
 			foreach ($files as $episode)
 			{
 				$episode = urlencode(basename($episode));
-				$name = $core->clean($episode);
+				$name = Media::clean($episode);
 				$urlEpisode = urlencode($episode.$type);
 				if(strlen($name) > 50)
 				{
@@ -192,7 +193,7 @@ else
 			{
 				$season = basename($season);
 				$getSeason = urlencode(basename($season));
-				$name = $core->clean($season, "dir");
+				$name = Media::clean($season, "dir");
 				if(strlen($name) > 50)
 				{
 					$name = substr($name,0,50) . "...";
@@ -205,5 +206,5 @@ else
 		}
 	}
 }
-$core->endPage("lazyload");
+$Core->endPage("lazyload");
 ?>

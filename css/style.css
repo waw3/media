@@ -55,9 +55,16 @@ html {
 	min-width: 765px;
 	position: fixed;
 }
+#indexWrapper
+{
+	margin: 0 auto;
+	width: 90%;
+	height: 90%;
+	position: relative;
+	text-align: center;
+}
 label
 {
-
 	font-size: 14px;
 	font-weight: bold;
 }
@@ -71,7 +78,7 @@ formtext
 
 p
 {
-	text-align: right;
+	text-align: center;
 }
 #main
 {
@@ -101,6 +108,17 @@ p
 {
 	position: relative;
 	margin: 0 auto;
+	background-color: #303030;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	border-radius: 8px;
+
+}
+formtext
+{
+	min-width: 175px;
+	display: inline-block; 
+	text-align: right;
 }
 #textfield
 {
@@ -316,18 +334,24 @@ ul li:hover
 	background-position: center;
 	background-repeat: no-repeat;
 	display: inline-block;
-	height: 290px;
-	width: 163px;
+	height: 260px;
+	width: 170px;
 	text-align: center;
 	white-space:nowrap;
 	overflow: hidden;
 	vertical-align: top;
 	max-width: 100%;
+	margin-bottom: 5px;
 }
 #PosterContainer:hover
 {
 	cursor:pointer;
+	background-color: #101010;
+	-webkit-box-shadow: 0px 0px 0px 3px white;
+	-moz-box-shadow: 0px 0px 0px 3px white;
+	box-shadow: 0px 0px 0px 3px white;
 }
+
 #posters
 {
 	background-color: #000000;
@@ -365,27 +389,29 @@ ul li:hover
 }
 #recentlyAddedWrapper
 {
-    max-width:95%;
+	display: inline-block;
+	text-align: left;
+	width:100%;
     height:290px;
-    margin: 0 auto;
+    right: 10%;
 	white-space: nowrap;
 	background-color: #303030;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
-	border-radius: 4px;
 	overflow-x: auto;
 	overflow-y: hidden;
 }
 #recentlyAddedMovies
 {
-    max-width:95%;
-    height:275px;
-    margin: 0 auto;
+	display: inline-block;
+	text-align: left;
+	width:100%;
+    height:290px;
+    right: 10%;
 	white-space: nowrap;
 	background-color: #303030;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
-	border-radius: 4px;
 	overflow-x: auto;
 	overflow-y: hidden;
 }
@@ -504,13 +530,52 @@ progress
 	margin-left: 5px;
     background-color: #202020;
 	margin-bottom: 10px;
+	z-index:9999;
 }
 progress[value]::-webkit-progress-bar {
   background-color: #202020;
+  z-index:9999;
 }
 progress[value]::-webkit-progress-value {
   background-color: red;
+  z-index:9999;
 }
 progress[value]::-moz-progress-bar {
   background-color: red;
+  z-index:9999;
+}
+.rotate
+{
+	-webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+#scrollbutton
+{
+	background-color: rgba(192,192,192,0);
+	color: #C8C8C8;
+	border: 0;
+	margin-top: 5px;
+	font-size: 24px; 
+	height: 290px; 
+	position: absolute;
+	-webkit-transition: all 0.2s;
+	-moz-transition: all 0.2s;
+	-ms-transition: all 0.2s;
+	-o-transition: all 0.2s;
+	transition: all 0.2s;
+
+}
+#scrollbutton:hover
+{
+	color: white;
+	cursor:pointer;
+
+	background-color: rgba(192,192,192,.5);
+}
+#scrollbutton:focus
+{
+	outline: none;
 }
