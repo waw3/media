@@ -1,5 +1,4 @@
 <?php 
-
 require "vendor/autoload.php";
 $Core = new Core();
 $Core->requireSSL();
@@ -180,7 +179,7 @@ if(isset($_GET['edit']) && $_GET['edit'] == "settings")
 		
 		if(!isset($_POST['mCheck']) && !isset($_POST['sCheck']) && !isset($_POST['mCheck']) && !isset($_POST['val']))
 		{
-			$config = $Core->configInfo();
+			$config = Media::configInfo();
 			$mVal = str_replace("'", "",$config['movieDir']);
 			$sVal = str_replace("'", "",$config['showDir']);
 			$muVal = str_replace("'", "",$config['musicDir']);
