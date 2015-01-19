@@ -104,7 +104,7 @@ class Media
 			setInterval(function() {
 			$.get( "time.php", { media: "<?php print $video;?>",
 			time: Math.trunc(video.currentTime()) } );
-			}, 30000);
+			}, 15000);
 		</script>
 		</video>
 		<?php

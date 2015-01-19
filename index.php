@@ -18,12 +18,13 @@ $movieFiles = array_keys($movieFiles);
 
 ?>
 <?php
+echo '<div id="indexWrapper">'.PHP_EOL;
 $cw = @file_get_contents("Logs/".$_SESSION['username']."_cw.json");
 if($cw !== false && $cw != '[]')
 {
 	$cw = json_decode($cw,true);
 	$name = array_reverse(array_keys($cw));
-	echo '<div id="indexWrapper">'.PHP_EOL;
+
 	echo '<h1 class="currentlyWatching" style="text-shadow: 5px 3px 5px rgba(0,0,0,0.75); margin-top: 50px;">Currently Watching</h1>'.PHP_EOL;
 	echo '<div id="recentlyAddedWrapper">'.PHP_EOL;
 
@@ -105,10 +106,19 @@ if(count($movieFiles) > 0)
 	echo '</div>'.PHP_EOL;
 	echo '<p><button id="button" style="margin-right: 2.5%; clear:both;" name="hs" onclick="hideRecentM()">Hide/Show</button></p>';
 	echo '</div>'.PHP_EOL;
-	echo '<button id="scrollbutton" class="currentlyWatching" style="top: 88px; right: 5%;" name="hs" onclick="scrollX(recentlyAddedWrapper,400)">&#9658;</button>';
-	echo '<button id="scrollbutton" class="currentlyWatching" style="top: 88px; left: 5%;" name="hs" onclick="scrollX(recentlyAddedWrapper,-400)">&#9668;</button>';
-	echo '<button id="scrollbutton" class="recentMovies" style="top: 475px; right: 5%;" name="hs" onclick="scrollX(recentlyAddedMovies,400)">&#9658;</button>';
-	echo '<button id="scrollbutton" class="recentMovies" style="top: 475px; left: 5%;" name="hs" onclick="scrollX(recentlyAddedMovies,-400)">&#9668;</button>';
+	if($cw !== false && $cw != '[]')
+	{
+		echo '<button id="scrollbutton" class="currentlyWatching" style="top: 88px; right: 5%;" name="hs" onclick="scrollX(recentlyAddedWrapper,400)">&#9658;</button>';
+		echo '<button id="scrollbutton" class="currentlyWatching" style="top: 88px; left: 5%;" name="hs" onclick="scrollX(recentlyAddedWrapper,-400)">&#9668;</button>';
+		echo '<button id="scrollbutton" class="recentMovies" style="top: 475px; right: 5%;" name="hs" onclick="scrollX(recentlyAddedMovies,400)">&#9658;</button>';
+		echo '<button id="scrollbutton" class="recentMovies" style="top: 475px; left: 5%;" name="hs" onclick="scrollX(recentlyAddedMovies,-400)">&#9668;</button>';
+	}
+	else
+	{
+		echo '<button id="scrollbutton" class="recentMovies" style="top: 88px; right: 5%;" name="hs" onclick="scrollX(recentlyAddedMovies,400)">&#9658;</button>';
+		echo '<button id="scrollbutton" class="recentMovies" style="top: 88px; left: 5%;" name="hs" onclick="scrollX(recentlyAddedMovies,-400)">&#9668;</button>';
+	}
+	
 }
 ?>
 <?php $Core->endPage(); ?>
