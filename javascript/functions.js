@@ -104,3 +104,75 @@ function scrollX(element,p)
 {
 	$(element).animate( { scrollLeft: '+='+p }, 200);
 }
+function removeCW(dir)
+{
+	var dir2 = video.currentSrc();
+	var newdir = "";
+	
+	if(dir2.indexOf("&time=") > -1)
+	{
+		newdir = dir2.split("&time=");
+		dir2 = newdir[0];
+	}
+	
+	newdir = dir2.split("?media=");
+	dir2 = newdir[1];		
+	$.get( "time.php", { media: dir2,
+	remove: "true" });
+	window.location = "shows.php?show="+dir;
+}
+function popup(id)
+{
+	video.pause();
+	var e = document.createElement("div");
+	e.id = id;
+	var w = document.createElement("div");
+	w.id = id+"Wrapper";
+	var selectList = document.createElement('select');
+	var array = ["Report problem with playback","Report problem with video","Report problem with page"];
+	var form = document.createElement('form');
+	form.id = "reportForm";
+	form.action='javascript:report()';
+	selectList.setAttribute("id", "mySelect");
+	var textArea = document.createElement('textarea');
+	var label = document.createElement('label');
+	label.innerHTML = "Describe problem:";
+	label.style.color = "#E8E8E8";
+	label.style.marginTop = "20px";
+	textArea.setAttribute('form','reportForm');
+	textArea.setAttribute('name','reportText');
+	textArea.setAttribute('cols',60);
+	textArea.setAttribute('rows', 4);
+	textArea.style.backgroundColor = "#303030";
+	textArea.style.color = "#E8E8E8";
+	textArea.style.resize = "none";
+	textArea.style.border = "none";
+	textArea.style.outline = "none";
+	var submit = document.createElement("input");
+	submit.setAttribute('type',"submit");
+	submit.setAttribute('value',"Submit");
+	submit.id = "button";
+	submit.style.marginRight = "500px";
+	submit.style.marginLeft = "60px";
+	submit.style.marginRight = "0px";
+	for (var i = 0; i < array.length; i++) 
+	{
+		var option = document.createElement("option");
+		option.setAttribute("value", array[i]);
+		option.text = array[i];
+		selectList.appendChild(option);
+	}
+	form.appendChild(selectList);
+	form.appendChild(submit);
+	w.onclick = function () {
+		document.body.removeChild(e);
+		document.body.removeChild(w);
+		video.play();
+	};
+	e.appendChild(form);
+	e.appendChild(label);
+	e.appendChild(textArea);
+	document.body.appendChild(w);
+	document.body.appendChild(e);
+}
+

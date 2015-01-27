@@ -3,9 +3,9 @@ require "vendor/autoload.php";
 $Core = new Core();
 $Core->startSessionAdmin();
 $shows = array_filter(glob('shows/*'), 'is_dir');
-$metaShows = glob("metadata/shows/*.txt");
+$metaShows = glob("metadata/shows/*.json");
 $movies = glob("movies/*.{mp4,mkv,avi}",GLOB_BRACE );
-$metaMovies = glob("metadata/movies/*.txt");
+$metaMovies = glob("metadata/movies/*.json");
 cleanArray($shows);
 cleanArray($metaShows);
 cleanArray($movies);
@@ -57,11 +57,16 @@ function cleanArray(&$array)
 {
 	for($i = 0; $i < count($array); $i++)
 	{
-		if(strpos($array[$i],"txt") !== false 
-		|| strpos($array[$i],"movies") !== false)
+		if(strpos($array[$i],"json") !== false)
+		{
+			$array[$i] = basename($array[$i]);
+			$array[$i] = substr($array[$i],0,count($array[$i])-6);
+		}
+		else if(strpos($array[$i],"movies") !== false)
 		{
 			$array[$i] = basename($array[$i]);
 			$array[$i] = substr($array[$i],0,count($array[$i])-5);
+			
 		}
 		else
 		{

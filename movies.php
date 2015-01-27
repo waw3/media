@@ -1,11 +1,7 @@
 <?php
-if($_SERVER['SERVER_PORT'] == '443') 
-{ 
-	header('Location: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
-	exit();
-}
 require "vendor/autoload.php";
 $Core = new Core();
+$Core->requireSSL();
 $Core->startSessionRestricted();
 if($Core->getBrowser() != "Firefox")
 {
@@ -21,8 +17,6 @@ $get=false;
 //So we are going to filter the array to meet their needs.
 if(isset($_POST['searchtext']))
 {
-		// $search = $_POST['searchtext'];[tT][rR][aA]
-		// $files = glob("metadata/movies/$search.txt");
 		$files = array_filter($files, 
 		function ($var) { 
 		$search = $_POST['searchtext']; 
@@ -32,18 +26,17 @@ if(isset($_POST['searchtext']))
 
 //The GET variable is set so someone is probably trying to watch a movie
 if(isset($_GET["movie"]) && stripos(implode($files, " "),
-substr($_GET["movie"],0,strlen($_GET["movie"])-4)) !== false ) 
+$_GET["movie"]) !== false ) 
 {
-	$type = substr($_GET['movie'],strlen($_GET['movie'])-3);
-	$plainTextMovieName = substr($_GET['movie'],0,strlen($_GET['movie'])-4);
-	$movieinfo = file_get_contents("metadata/movies/".$plainTextMovieName.".txt");
-	$movieinfo = explode("\n",$movieinfo);
+	$movieName = $_GET['movie'];
+	$movieinfo = json_decode(file_get_contents("metadata/movies/".$_GET["movie"].".json"),true);
+	$type = $movieinfo['type'];
 	$dir = "movies/" . html_entity_decode($_GET['movie']);
-	$Core->createPage($plainTextMovieName);
+	$Core->createPage($_GET["movie"]);
 	$get=true;
-	$movieTitle = $movieinfo[1];
-	$movieRating = $movieinfo[2];
-	$moviePlot = $movieinfo[4];
+	$movieTitle = $movieinfo['title'];
+	$movieRating = $movieinfo['Rating'];
+	$moviePlot = $movieinfo['plot'];
 	
 }
 else{$Core->createPage("Simple Media Streamer","searchBar","movies.php");}
@@ -52,62 +45,70 @@ else{$Core->createPage("Simple Media Streamer","searchBar","movies.php");}
 if($get) 
 {
 ?>
-	<div id="contentWrapper" >
-		<div id="videocontainer" style="margin-top: 50px;">
+	<div id="contentWrapper">
+		<div id="videocontainer">
 			<text style="position: relative; bottom: 5px; left: 45px;
 			text-shadow: 5px 3px 5px rgba(0,0,0,0.75);"><?php print $movieTitle; ?></text>
 			<?php
-			if(isset($_GET['time']) && is_numeric($_GET['time']) && $_GET['time'] < Media::movieInfo("movies/".$_GET['movie'],"length"))
+			if(isset($_GET['time']) && is_numeric($_GET['time']) 
+				&& $_GET['time'] < Media::movieInfo("movies/".$_GET['movie'].$type,"length"))
 			{
-				Media::playVideo($_GET['movie'],$_GET['time']);
+				
+				Media::playVideo($_GET['movie'].$type,$_GET['time']);
 			}
-			else{Media::playVideo($_GET['movie']);}
-
-			
+			else{Media::playVideo($_GET['movie'].$type);}	
 			?>
-			<p style="text-align: left; text-shadow: 5px 3px 5px rgba(0,0,0,0.75);">
+			<div id="plot">
+			<fieldset style="width:100%; margin-top: 10px;">
+			<legend style="color: #E8E8E8;">Plot</legend>
 			<?php print $moviePlot; ?></p>
+			</fieldset>
+			</div>
 		</div>
 	
 		<div class="metadataContainer">
-			<?php
-			$poster = "images/movie";
-			if(file_exists("metadata/movies/$plainTextMovieName.jpeg")) 
-			{ 
-				$poster = "metadata/movies/".$plainTextMovieName;
-			}
-			?>
-			<img src="<?php print $poster.'.jpeg'; ?>"  id="posters" 
-			width="<?php print $width; ?>" height="<?php print $height; ?>">
-			<p style="margin-top: 5px; text-align: center; 
-			text-shadow: 5px 3px 5px rgba(0,0,0,0.75); ">
-			<?php print $movieRating; ?></p>
-			
+			<div class="info">
+				<?php
+				$poster = "images/movie.jpeg";
+				if(file_exists("metadata/movies/$movieName.jpeg")) 
+				{ 
+					$poster = "metadata/movies/".$movieName.'.jpeg';
+				}
+				?>
+				<img src="<?php print $poster; ?>"  id="posters" 
+				width="<?php print $width; ?>" height="<?php print $height; ?>">
+				<p style="margin-top: 5px; text-align: center; 
+				text-shadow: 5px 3px 5px rgba(0,0,0,0.75); ">
+				<?php print "Rated ".$movieRating; ?></p>
+			</div>
+			<div id="options" style="text-align: left;">
+				<button type="button" id="button" style="margin-left: 5px; background: none;" onclick="popup('report')">Report</button>
+			</div>
 		</div>
+		
 	</div>
 <?php	
 } 		
 else // if get is false then we load the movie list.
 {
-	echo '<h1 style="margin-top: 50px;">Movies('.
-	count($files).')</h1>'.PHP_EOL;	
+	echo '<h1 id="title">Movies('.count($files).')</h1>'.PHP_EOL;	
 	echo '<div style="text-align: center;">'.PHP_EOL;				 
 	foreach($files as $value) 
 	{
 		$value = basename($value);
-		$movieinfo = @file_get_contents("metadata/movies/".
-		substr($value,0,strlen($value)-4).".txt");
+		$movieinfo = json_decode(@file_get_contents("metadata/movies/".
+		substr($value,0,strlen($value)-4).".json"),true);
 		if($movieinfo !== FALSE)
 		{
-			$movieinfo = explode("\n",$movieinfo);
 			$getvalue = urlencode(substr($value,0,strlen($value)-4).$movieinfo[0]);
-			$title = substr($movieinfo[1],0,strpos($movieinfo[1],"("));
-			$title2 = substr($value,0,strlen($value)-4);
+			$title = $movieinfo['title'];
+			$title2 = $title;
 			
 			if(strlen($title) > 17)
 			{
 				$title = substr($title,0,17) . "...";
 			}
+
 			if(file_exists("metadata/movies/$title2".".jpeg"))
 			{
 				echo '<div id="PosterContainer" onclick='.

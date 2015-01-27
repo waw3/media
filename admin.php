@@ -1,7 +1,6 @@
 <?php 
 require "vendor/autoload.php";
 $Core = new Core();
-$Core->requireSSL();
 $Core->startSessionAdmin();
 $con = $Core->dbConnect();
 $Core->createPage("Admin control panel","adminMenu");

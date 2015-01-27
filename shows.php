@@ -1,12 +1,8 @@
 <?php
-if($_SERVER['SERVER_PORT'] == '443') 
-{ 
-	header('Location: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
-	exit();
-}
 require "vendor/autoload.php";
 $Core = new Core();
 $Core->startSessionRestricted();
+$dir = $Core->cwd();
 function play($show,$season = "",$episode, &$files)
 {
 	if(!empty($season))
@@ -37,37 +33,61 @@ function play($show,$season = "",$episode, &$files)
 	}
 	$Core = new Core();
 	$Media = new Media();
+	$title = $Media->clean(substr($_GET['episode'],0,strlen($_GET['episode'])-4));
+	if(strlen($title) > 50)
+	{
+		$title = substr($title,0,50)."...";
+	}
 	?>
 	<div id="contentWrapper">
-		<div id="videocontainer" style="margin-top: 50px;">
+		<div id="videocontainer">
 			<text style="position: relative; bottom: 5px; left: 45px;
-			text-shadow: 5px 3px 5px rgba(0,0,0,0.75);"><?php print Media::clean(substr($_GET['episode'],0,strlen($_GET['episode'])-4)); ?></text>
-			<?php $Media->playVideo($dir);?>
-<?php
-	if($pIndex >= 0)
-	{
-		print "<button type=\"button\" id=\"button\" style=\"background:".
-		" none; float: left;\" onclick=\"javascript:location.href='shows.php".
-		"?show=$pDir'\">Previous</button>";
-	}
-	if($nIndex < count($files))
-	{
-		print "<button type=\"button\" id=\"button\" style=\"background:".
-		" none; float: right;\" onclick=\"javascript:location.href='shows.php?".
-		"show=$nDir'\">Next</button>";
-	}
+			text-shadow: 5px 3px 5px rgba(0,0,0,0.75);"><?php print $title; ?></text>
+			
+			<?php 
+			if(isset($_GET['time']) && is_numeric($_GET['time']) 
+				&& $_GET['time'] < Media::movieInfo($dir))
+			{	
+				Media::playVideo($dir,$_GET['time']);
+			}
+			else{Media::playVideo($dir);}
+			if($pIndex >= 0)
+			{
+				print "<button type=\"button\" id=\"button\" style=\"background:".
+				" none; float: left;\" onclick=\"removeCW('".$pDir."')\">Previous</button>";
+			}
+			if($nIndex < count($files))
+			{
+				print "<button type=\"button\" id=\"button\" style=\"background:".
+			" none; float: right;\" onclick=\"removeCW('".$nDir."')\">Next</button>";
+			}
+			?>
+			</div>
+	
+		<div class="metadataContainer">
+			<?php
+			$poster = $_GET['show'].".jpeg";
+			if(file_exists("metadata/shows/$poster")) 
+			{ 
+				$poster = "metadata/shows/$poster";
+			}
+			?>
+			<img src="<?php print $poster; ?>"  id="posters" 
+			width="<?php print $width; ?>" height="<?php print $height; ?>">
+			
+	<?php
+	//Next-Previous buttons for episodes.
 	echo '</div>'.PHP_EOL;
 	echo '</div>'.PHP_EOL;
 		
 }
 $Core->createPage("Shows","searchBar","shows.php");
+// If show is empty show a list of shows.
 if(empty($_GET['show']))
 {
 	$dirs = array_filter(glob('shows/*'), 'is_dir');
 	if(isset($_POST['searchtext']))
 	{
-		// $search = $_POST['searchtext'];[tT][rR][aA]
-		// $files = glob("metadata/movies/$search.txt");
 		$dirs = array_filter($dirs, 
 		function ($var) { 
 		$search = $_POST['searchtext']; 
@@ -80,12 +100,13 @@ if(empty($_GET['show']))
 		$show = $dirs[$i];
 		$shows[basename($show)] = array_filter(glob("$show/*"), 'is_dir');
 	}
-	echo '<h1 style="margin-top: 50px;">Shows('.count($shows).')</h1>'.PHP_EOL;	
+		echo '<h1 id="title">Shows('.count($shows).')</h1>'.PHP_EOL;	
 	echo '<div style="text-align: center;">'.PHP_EOL;
 	foreach (array_keys($shows) as $showName)
 	{
 		if(file_exists("metadata/shows/$showName".".jpeg"))
 		{
+
 			$fileName = $showName;
 			$show = urlencode($showName);
 			$showName = Media::clean($showName, "dir");
@@ -94,20 +115,20 @@ if(empty($_GET['show']))
 				$showName = substr($showName,0,17) . "...";
 			}
 			echo '<div id="PosterContainer" onclick='.
-			'\'javascript:location.href="shows.php?show='
+			'\'javascript:location.href="'.$dir.'/shows.php?show='
 			.$show.'"\'>'.PHP_EOL;
 			echo '<label style="cursor:pointer; text-shadow: '.
 			'5px 3px 5px rgba(0,0,0,0.75);">'.
 			$showName.'</label><br>'.PHP_EOL;
 			echo '<img class="lazy img-responsive" id="posters" alt="'.$showName.
 			'" src="images/holder.jpg" data-original="'.
-			"metadata/shows/$fileName".'.jpeg" >'.PHP_EOL;
+			"$dir/metadata/shows/$fileName".'.jpeg" >'.PHP_EOL;
 			echo '</div>'.PHP_EOL;
 		}
 	}
 			echo '</div>'.PHP_EOL;
 }
-else
+else // User has selected a season and episode so run play function.
 {
 	if(!empty($_GET['season']) && !empty($_GET['episode']))
 	{
@@ -118,6 +139,7 @@ else
 		sort($files, SORT_NATURAL);
 		play($show,$season,$episode,$files);
 	}
+	//If season isn't empty show the contents of that directory.
 	else if(!empty($_GET['season']))
 	{
 		$show = $_GET['show'];
@@ -126,9 +148,9 @@ else
 
 		$files = glob("shows/$show/$season/*.{mp4,mkv,avi}",GLOB_BRACE );
 		sort($files, SORT_NATURAL);
+		echo '<h1 id="title" style="font-size: 24px;">'.$season.'</h1>'.PHP_EOL;
 		$season = urlencode($season);
-		echo '<h1 style="margin-top: 50px;">'.$show.'</h1>'.PHP_EOL;
-		echo "<div id=\"musiclist\" onclick='javascript:location.href=\"shows.php?show=$urlShow\"'>".PHP_EOL;
+		echo "<div id=\"musiclist\" onclick='javascript:location.href=\"$dir/shows.php?show=$urlShow\"'>".PHP_EOL;
 		echo "Back";
 		echo '</div>';
 		
@@ -143,11 +165,12 @@ else
 				$name = substr($name,0,50) . "...";
 			}		
 			echo "<div id=\"musiclist\" onclick='javascript:location.href=\"".
-			"shows.php?show=$urlShow&season=$season&episode=$urlEpisode\"'>".PHP_EOL;
+			"$dir/shows.php?show=$urlShow&season=$season&episode=$urlEpisode\"'>".PHP_EOL;
 			echo "$name";
 			echo "</div>".PHP_EOL;
 		}
 	}
+	//If episode isn't empty then play that episode.
 	else if(!empty($_GET['episode']))
 	{
 		$show = $_GET['show'];
@@ -156,16 +179,18 @@ else
 		sort($files, SORT_NATURAL);
 		play($show,"",$episode,$files);
 	}
+	//If season and episode are empty show the contents of the show directory.
 	else
 	{
 		$show = $_GET['show'];
 		$urlShow = urlencode($_GET['show']);
 		$dirs = array_filter(glob("shows/$show/*"), 'is_dir');
 		sort($dirs, SORT_NATURAL);
-		echo '<h1 style="margin-top: 50px;">'.$show.'</h1>'.PHP_EOL;
-		echo "<div id=\"musiclist\" onclick='javascript:location.href=\"shows.php\"'>".PHP_EOL;
+		echo '<h1 id="title" style="font-size: 24px;">'.$show.'</h1>'.PHP_EOL;
+		echo "<div id=\"musiclist\" onclick='javascript:location.href=\"$dir/shows.php\"'>".PHP_EOL;
 		echo "Back";
 		echo '</div>';
+		//If there are no directories show the episodes.
 		if(count($dirs) == 0)
 		{
 			$files = glob("shows/$show/*.{mp4,mkv,avi,MP4,MKV,AVI}",GLOB_BRACE );
@@ -180,12 +205,13 @@ else
 				{
 					$name = substr($name,0,50) . "...";
 				}		
-				echo "<div id=\"musiclist\" onclick='javascript:location.href=\"shows.php?".
+				echo "<div id=\"musiclist\" onclick='javascript:location.href=\"$dir/shows.php?".
 				"show=$urlShow&episode=$urlEpisode\"'>".PHP_EOL;
 				echo "$name";
 				echo "</div>".PHP_EOL;
 			}
 		}
+		// Show the directories in the show's directory
 		else
 		{
 	
@@ -198,7 +224,7 @@ else
 				{
 					$name = substr($name,0,50) . "...";
 				}				
-				echo "<div id=\"musiclist\" onclick='javascript:location.href=\"shows.php?".
+				echo "<div id=\"musiclist\" onclick='javascript:location.href=\"$dir/shows.php?".
 				"show=$urlShow&season=$getSeason\"'>".PHP_EOL;
 				echo "$name";
 				echo "</div>".PHP_EOL;
@@ -206,5 +232,6 @@ else
 		}
 	}
 }
+echo '</div>';
 $Core->endPage("lazyload");
 ?>

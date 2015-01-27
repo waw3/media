@@ -22,7 +22,8 @@ else if(Media::movieInfo($media,"vCodec") != "h264"){$transcode = true;}
 else if(Media::movieInfo($media,"aCodec") != "aac"){$transcode = true;}
 header('Content-Length: '.Media::movieInfo($media,"size"));
 $media = escapeshellarg($media);
-
+header('Content-type: video/webm');
+header('Content-Disposition: attachment; filename="'.$rString.'.webm"');
 if($transcode)
 {
 	//If it has to be transcoded then we are going to set some bitrate info.
@@ -43,8 +44,6 @@ if($transcode)
 	else{$bitrate = '-b:v '.$movieRate.'k -bufsize '.$movieRate*2 .'k ';}
 	$command = "/sbin/sysctl -a | egrep -i 'hw.ncpu'| awk '{print $2}'";
 	$threads = shell_exec($command)-1;
-	header('Content-type: video/webm');
-	header('Content-Disposition: attachment; filename="'.$rString.'.webm"');
 	//Using ffmpeg from the settings above. This is using the webm container.
 	if($Core->getBrowser() == "Firefox" || $Core->getBrowser() == "MSIE" ){$cmd = "/usr/local/bin/ffmpeg -ss $time -re ";}
 	else{$cmd = "/usr/local/bin/ffmpeg -ss $time -re ";}
@@ -53,11 +52,7 @@ if($transcode)
 }
 else
 {
-	header('Content-type: video/webm');
-	header('Content-Disposition: attachment; filename="'.$rString.'.webm"');
-
 	$cmd = "/usr/local/bin/ffmpeg -ss $time -i $media -c:v copy -c:a copy  -f matroska -";
 }
-ob_end_clean();
 passthru($cmd);
 ?>

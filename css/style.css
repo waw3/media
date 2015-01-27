@@ -1,3 +1,4 @@
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,300,400,700);
 .newUser {
  -webkit-animation: color_change 1s infinite alternate;
  -moz-animation: color_change 1s infinite alternate;
@@ -37,25 +38,19 @@ body
 	background-color:#404040;
 	margin-top: 0px;
 	margin-bottom: 0px;
+	font-family: 'Open Sans', sans-serif;
+	font-weight: 700;
 
 }
-html {
-	font-family: Verdana, Geneva, sans-serif;
-	font-weight: bold;
-}
-.container {
-  width: 150px;
-  margin: 10px auto;
-  padding: 0;
-}
+
 #wrapper
 {
 	width: 100%;
 	height: 100%;
-	min-width: 765px;
+	min-width: 800px;
 	position: fixed;
 }
-#indexWrapper
+#mainContentWrapper
 {
 	margin: 0 auto;
 	width: 90%;
@@ -82,12 +77,15 @@ p
 }
 #main
 {
+	padding: 25px;
+	padding-bottom: 50px;
+	margin-top: 50px;
 	position: relative;
 	right: 8px;
 	width: 100%;
 	height: 100%;
 	background-color:#404040;
-	color: #FFFFFF;
+	color: #E8E8E8;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
@@ -103,6 +101,12 @@ p
 	-moz-box-shadow: 0 0 10px 2px #200000;
 	-webkit-box-shadow: 0 0   10px 2px #200000;
 	box-shadow: 0 0 10px 2px #200000;
+}
+#title
+{
+	text-shadow: 5px 3px 5px rgba(0,0,0,0.75);
+	margin-top: 50px;
+	text-align: center;
 }
 #centerform
 {
@@ -227,7 +231,6 @@ formtext
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
 	margin-top: 5px;
-	float: right;
 }
 #button:hover
 {
@@ -243,51 +246,33 @@ formtext
 {
 	outline: none;
 }
-h1 
+#login
 {
-	font-size: 23px;
-	text-align: center;
+	margin-top: 50px;
+	background-color: #303030;
+	width: 400px;
+	height: 275px;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	border-radius: 8px;
+	-webkit-box-shadow: 0px 3px 3px 0px rgba(50, 50, 50, 0.75);
+	-moz-box-shadow:    0px 3px 3px 0px rgba(50, 50, 50, 0.75);
+	box-shadow:         0px 3px 3px 0px rgba(50, 50, 50, 0.75);
+	margin-bottom: 40px;
 }
-h2 
+#register
 {
-	color: red;
-	font-size: 12px;
-	text-align: center;
-}
-h3 
-{
-	color: green;
-	font-size: 12px;
-	text-align: center;
-}
-
-ul 
-{
-  text-align: Left;
-  display: inline;
-  margin: 0;
-  padding: 15px 4px 17px 0;
-  list-style: none;
-}
-ul li 
-{
-  color: #C8C8C8;
-  font: bold 18px/24px sans-serif;
-  display: inline-block;
-  margin-right: -4px;
-  position: relative;
-  padding: 5px 7px;
-  background-color: #101010;
-  cursor: pointer;
-  -webkit-transition: all 0.2s;
-  -moz-transition: all 0.2s;
-  -ms-transition: all 0.2s;
-  -o-transition: all 0.2s;
-  transition: all 0.2s;
-}
-ul li:hover 
-{
-  color: white;
+	margin-top: 50px;
+	background-color: #303030;
+	width: 400px;
+	height: 400px;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	border-radius: 8px;
+	-webkit-box-shadow: 0px 3px 3px 0px rgba(50, 50, 50, 0.75);
+	-moz-box-shadow:    0px 3px 3px 0px rgba(50, 50, 50, 0.75);
+	box-shadow:         0px 3px 3px 0px rgba(50, 50, 50, 0.75);
+	margin-bottom: 40px;
 }
 .wrapper
 {
@@ -299,31 +284,38 @@ ul li:hover
 }
 #videocontainer
 {
+	background-color: #222222;
+	border: 1px solid black;
+	padding-top: 10px;
 	display: inline-block;
-	height: 400px;
-	width: 640px;
-	margin-left: auto;
-	margin-right: auto;
+	max-height: 900px;
+	width: 642px;
+	margin: 0 auto;
 	text-align: center
 }
 .metadataContainer
 {
-	display: inline-block;
-	height: 300px;
-	width: 182px;
-	margin-top: 50px;
-	float: right;
-	top: 0px;
-	margin-right: 50px;
-	text-align: center;
 	
+	display: inline-block;
+	height: 500px;
+	width: 182px;
+	text-align: center;
+	background-color: #404040;
+	float: right;
+}
+.info
+{
+	width: 182px;
+	height: 275px;
+	background-color: #222222;
+	border: 1px solid black;
 }
 #contentWrapper 
 {
 	margin-top: 50px;
 	position: relative;
-    width:1000px;
-    height:500px;
+    width:849px;
+    max-height:1000px;
     text-align:center;
 	margin-left: auto;
 	margin-right: auto;
@@ -334,7 +326,7 @@ ul li:hover
 	background-position: center;
 	background-repeat: no-repeat;
 	display: inline-block;
-	height: 260px;
+	height: 270px;
 	width: 170px;
 	text-align: center;
 	white-space:nowrap;
@@ -342,6 +334,11 @@ ul li:hover
 	vertical-align: top;
 	max-width: 100%;
 	margin-bottom: 5px;
+		-webkit-transition: all 0.2s;
+	-moz-transition: all 0.2s;
+	-ms-transition: all 0.2s;
+	-o-transition: all 0.2s;
+	transition: all 0.2s;
 }
 #PosterContainer:hover
 {
@@ -354,6 +351,7 @@ ul li:hover
 
 #posters
 {
+	margin: 0 auto;
 	background-color: #000000;
 	position: relative;
 	width: 150px;
@@ -387,17 +385,16 @@ ul li:hover
 ::-webkit-scrollbar-thumb:window-inactive {
 	background: #999999; 
 }
-#recentlyAddedWrapper
+#currentlyWatchingWrapper
 {
 	display: inline-block;
 	text-align: left;
+	left: 0px;
 	width:100%;
-	left: 0;
-    height:290px;
+    height:300px;
 	white-space: nowrap;
-	background-color: #303030;
-	-moz-border-radius: 4px;
-	-webkit-border-radius: 4px;
+	background-color: #222222;
+	border: 1px solid black;
 	overflow-x: auto;
 	overflow-y: hidden;
 }
@@ -407,11 +404,10 @@ ul li:hover
 	text-align: left;
 	left: 0px;
 	width:100%;
-    height:290px;
+    height:300px;
 	white-space: nowrap;
-	background-color: #303030;
-	-moz-border-radius: 4px;
-	-webkit-border-radius: 4px;
+	background-color: #222222;
+	border: 1px solid black;
 	overflow-x: auto;
 	overflow-y: hidden;
 }
@@ -512,14 +508,17 @@ select.list1
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
-    background-color: grey;
+    background-color: #222222;
 	float: right;
 	z-index: 55;
-	width: 90px;
+	width: 100px;
+	bottom: 5px;
+	border: none;
+	outline: none;
 }
 select.list1:focus
 {
-	
+    border: none;
 	outline: none;
 }
 progress                        
@@ -528,9 +527,9 @@ progress
 	height: 5px;
 	width: 150px;
 	margin-left: 5px;
+	margin-top: 10px;
     background-color: #202020;
 	margin-bottom: 10px;
-	z-index:9999;
 }
 progress[value]::-webkit-progress-bar {
   background-color: #202020;
@@ -582,4 +581,56 @@ progress[value]::-moz-progress-bar {
 button::-moz-focus-inner {
   border: 0;
 }
+#plot
+{
+	text-align: left; 
+	padding-left: 5px;
+	padding-right: 5px;
+}
+#options
+{
+	margin-top: 13px;
+	display: absolute;
+	height: 200px;
+	width: 182px;
+	text-align: center;
+	background-color: #222222;
+	border: 1px solid black;
+	left: 0px;
+}
+#reportWrapper
+{
+	position:fixed;
+	width: 100%;
+	height: 100%;
+	background-color: black;
+	opacity: .7;
+}
+#report
+{
+	position:fixed;
+	top: 50%;
+	left: 50%;
+	background-color: #222222;
+	border: 1px solid black;
+	width:504px;
+	height:160px;
+	margin-left:-252px;
+	margin-top:-80px;
+	opacity: 1;
+}
+.navbar-collapse.collapse {
+display: block!important;
+}
 
+.navbar-nav>li, .navbar-nav {
+float: left !important;
+}
+
+.navbar-nav.navbar-right:last-child {
+margin-right: -15px !important;
+}
+
+.navbar-right {
+float: right!important;
+}

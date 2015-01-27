@@ -33,6 +33,11 @@ class Core
 			header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
 			exit();
 		}
+		else if($_SERVER['SERVER_PORT'] == '443' && Media::configInfo("ssl") != "on")
+		{
+			header('Location: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+			exit();
+		}
 	}
 	public function setup($dbUser, $dbPass)
 	{
@@ -196,15 +201,15 @@ class Core
 		if ($this->isMobile())
 		{ 
 		?>
-			<link href="css/mobilestyle.php" 
+			<link href="<?php print $this->cwd();?>/css/mobilestyle.php" 
 			      rel="stylesheet" type="text/css" />	
 		<?php
 		}
 		else
 		{
 		?>
-			<link href="css/style.css" 
-			      rel="stylesheet" type="text/css" />
+			<link href="<?php print $this->cwd();?>/css/bootstrap.min.css" rel="stylesheet">
+			<link href="<?php print $this->cwd();?>/css/style.css" rel="stylesheet">
 		<?php
 		}
 	}
@@ -360,65 +365,78 @@ class Core
 			header("Location: $dir");
 		}
 	}
-	public function searchBar($action)
+public function header()
 	{
+		$dir=$this->cwd();
 	?>
-		<div id="searchbar">
-			<form action ="<?php print $action; ?>" method="post">
-				<input type="search" id="textfield" style="height:24px" name="searchtext"/>
-				<input id="submit" type="submit" value="Search"
-				name="search" style="font-size: 16px; margin-left: 5px;" />
-			</form>
-		</div>
+      <!-- Static navbar -->
+      <nav class="navbar navbar-inverse navbar-fixed-top" style="max-height: 500px; min-width: 768px;">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="<?php print $dir;?>">SMS</a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav" style="min-width: 220px;">
+              <li><a href="<?php print $dir;?>">Home</a></li>
+              
+			   <?php if(!isset($_SESSION['username']))
+			  {
+				print '<li><a href="login.php">Login</a></li>';
+				print '<li><a href="register.php">Register</a></li>';
+			  }
+			  else
+			  {
+				?>
+		  <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Account<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+		  <?php if($_SESSION['group'] == "admin")
+		  {
+		  ?>
+			<li><a href="admin.php?edit=list">Admin Panel</a></li>
+		  <?php
+		  }
+		  ?>
+            <li><a href="<?php print $dir;?>/user">Control Panel</a></li>
+            <li><a href="logout.php">Logout</a></li>
+			</ul>
+			</li>
+			<li><a href="<?php print $dir;?>/movie">Movies</a></li>
+			<li><a href="<?php print $dir;?>/show">Shows</a></li>
+			 <?php if($_SESSION['group'] == "admin")
+			{
+			?>
+				<li><a href="<?php print $dir;?>/update">Update</a></li>
+			<?php
+			}
+		  ?>
+			<?php
+			}
+			?>
+            </ul>
+			 <?php if(isset($_SESSION['username']))
+			  {
+			  ?>
+				<div class="col-sm-3 col-md-3">
+				<form class="navbar-form navbar-left" style="width: 400px;" role="search" action="search.php">
+					<div class="input-group">
+						<input type="text" class="form-control" placeholder="Search" name="srch-term" id="se">
+					<div class="input-group-btn">
+						<button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+					</div>
+					</div>
+				</form>
+			</div>
+			<?php
+			}
+			?>
+			 </div>
+      </nav>
 	<?php
-	}
-	public function header()
-	{
-		if(!isset($_SESSION['username'])) 
-		{
-			$options="<li onclick=\"javascript:location.href='login.php'\">".
-			"Log in</li>".PHP_EOL .
-			"<li onclick=\"javascript:location.href='register.php'\">".
-			"Register</li></ul>";
-		}
-		else
-		{
-			$options="<li onclick=\"javascript:location.href='logout.php'\">".
-			"Log out</li>". 
-			PHP_EOL . "<li onclick=\"javascript:location.href='movies.php'\">".
-			"Movies</li>".PHP_EOL .
-			"<li onclick=\"javascript:location.href='shows.php'\">".
-			"Shows</li>".PHP_EOL;
-			if($_SESSION['group'] == "admin")
-			{
-				$options = $options .
-				"<li onclick=\"javascript:location.href='update.php'\">".
-				"Update</li>". PHP_EOL .
-				"<li ".$this->getClass().
-				"onclick=\"javascript:location.href='admin.php?edit=list'\">".
-				"Admin CP</li></ul>" . PHP_EOL;
-			}
-			else
-			{
-				$options = $options .
-				"<li onclick=\"javascript:location.href='user.php'\">".
-				"User CP</li></ul>". PHP_EOL;
-			}
-		}	
-?>
-
-<div id = "header">
-	<div id="nav">
-		<ul><li onclick="javascript:location.href=
-		'<?php print $this->cwd();?>'">Home</li>
-		<?php print $options; ?>
-	</div>
-</div>
-<?php
 	}
 	//creates opening tags and accepts a page title..
 	public function createPage($title, $function="",$var="") 
-	{	
+	{
+	$this->requireSSL();
 	?>
 		<!doctype html>
 		<html>
@@ -431,13 +449,20 @@ class Core
 			<meta charset="UTF-8">
 			<?php $this->styles(); ?>
 			<script src="javascript/jquery-2.1.0.min.js"></script>	
-			<script src="javascript/functions.js"></script>			
+			<script src="javascript/functions.js"></script>
+			<script src="javascript/bootstrap.min.js"></script>
+			<script>
+				$(document).ready(function () {
+				$('.dropdown-toggle').dropdown();
+				});
+			</script>			
 		</head>	
 		<body>
 			<div id ="wrapper">
+
 			<?php if(!$this->isMobile()){ $this->header(); } ?>
-			<?php if(!empty($function)){$this->$function($var);}?>
 			<div id="main" >
+			
 	<?php
 	}
 	//echos the closing tags of the html page.
@@ -445,7 +470,6 @@ class Core
 	{
 	?>
 		</div>
-		<?php if($this->isMobile()){ $this->header(); } ?>
 		</div>
 		<?php if(!empty($function)){$this->$function(); } ?>
 		</body>
@@ -455,7 +479,7 @@ class Core
 	function lazyLoad()
 	{
 	?>
-		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+		<script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
 		<script src="javascript/jquery.lazyload.js"></script>
 		<script type="text/javascript" charset="utf-8">
 		$(function() {
