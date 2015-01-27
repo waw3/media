@@ -10,5 +10,5 @@ $route->add($cwd.'/show','shows.php');
 $route->add($cwd.'/user','user.php');
 $route->add($cwd.'/admin','admin.php');
 $route->add($cwd.'/update','update.php');
-$route->add($cwd.'logout','logout.php');
+$route->add($cwd.'/logout','logout.php');
 $route->submit();

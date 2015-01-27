@@ -40,8 +40,8 @@ if($cw !== false && $cw != '[]')
 		if(strpos($media,"movies") !== false)
 		{
 			echo '<div id="PosterContainer" style="margin-top: '.
-			'5px; margin-left: 5px;" onclick=\'javascript:location.href="'.$cwd.'/movies.php?movie='.
-			$getvalue.'&time='.$cw["$media"][0].'"\'>'.PHP_EOL;
+			'5px; margin-left: 5px;" onclick=\'javascript:location.href="'.$cwd.'/movie/'.
+			$getvalue.'/'.$cw["$media"][0].'"\'>'.PHP_EOL;
 			echo '<label style="cursor:pointer; text-shadow: '.
 			'5px 3px 5px rgba(0,0,0,0.75);">'.$title.'</label><br>'.PHP_EOL;
 			echo '<img  id="posters" alt="'.$title2.'" src="'.

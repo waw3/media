@@ -5,7 +5,7 @@ class Core
 {
 	private $cssClass="";
 	//gets the current working current directory without the document root.
-	public function cwd()
+	public static function cwd()
 	{
 		return substr(getcwd(), strlen($_SERVER['DOCUMENT_ROOT']));
 	}
@@ -448,9 +448,9 @@ public function header()
 			<meta http-equiv="Cache-control" content="public">
 			<meta charset="UTF-8">
 			<?php $this->styles(); ?>
-			<script src="javascript/jquery-2.1.0.min.js"></script>	
-			<script src="javascript/functions.js"></script>
-			<script src="javascript/bootstrap.min.js"></script>
+			<script src="<?php print $this->cwd();?>/javascript/jquery-2.1.0.min.js"></script>	
+			<script src="<?php print $this->cwd();?>/javascript/functions.js"></script>
+			<script src="<?php print $this->cwd();?>/javascript/bootstrap.min.js"></script>
 			<script>
 				$(document).ready(function () {
 				$('.dropdown-toggle').dropdown();
@@ -480,7 +480,7 @@ public function header()
 	{
 	?>
 		<script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
-		<script src="javascript/jquery.lazyload.js"></script>
+		<script src="<?php print $this->cwd();?>/javascript/jquery.lazyload.js"></script>
 		<script type="text/javascript" charset="utf-8">
 		$(function() {
 			$("img.lazy").lazyload({  

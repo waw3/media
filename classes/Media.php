@@ -33,6 +33,7 @@ class Media
 	}
 	public static function videojs($videoname, $width, $height, $length = "",$time="")
 	{
+		$cwd = Core::cwd();
 		$video = explode("?media=",$videoname);
 		$video = urldecode($video[1]);
 		if(strpos($video,"&time="))
@@ -90,7 +91,7 @@ class Media
 				}
 				video.oldCurrentTime(0);
 				video.start = time;
-				$.get( "time.php", { media: "<?php print $video;?>", 
+				$.get( "<?php print $cwd;?>/time.php", { media: "<?php print $video;?>", 
 				time: Math.trunc(time) } );
 				playvideo("<?php print $videoname."&time="; ?>" + Math.trunc(time));
 				video.load()
@@ -102,7 +103,7 @@ class Media
 			};
 			video.theDuration=<?php print $length; ?>;
 			setInterval(function() {
-			$.get( "time.php", { media: "<?php print $video;?>",
+			$.get( "<?php print $cwd;?>/time.php", { media: "<?php print $video;?>",
 			time: Math.trunc(video.currentTime()) } );
 			}, 15000);
 		</script>
@@ -205,26 +206,26 @@ class Media
 	}
 	public static function playVideo($dir,$time="",$bitrate="")
 	{
-	
+		$cwd = Core::cwd();
 		if(strpos($dir,"shows") === false)
 		{
 			$dir = "movies/" . html_entity_decode($dir);
 		}
 		if(!empty($time) && !empty($bitrate))
 		{
-			$urldir = "transcode.php?media=".urlencode($dir)."&time=".$time."&br=".$bitrate;
+			$urldir = "$cwd/transcode.php?media=".urlencode($dir)."&time=".$time."&br=".$bitrate;
 		}
 		else if(!empty($time))
 		{
-			$urldir = "transcode.php?media=".urlencode($dir)."&time=".$time;
+			$urldir = "$cwd/transcode.php?media=".urlencode($dir)."&time=".$time;
 		}
 		else if (!empty($bitrate))
 		{
-			$urldir = "transcode.php?media=".urlencode($dir)."&br=".$bitrate;
+			$urldir = "$cwd/transcode.php?media=".urlencode($dir)."&br=".$bitrate;
 		}
 		else
 		{
-			$urldir = "transcode.php?media=".urlencode($dir);
+			$urldir = "$cwd/transcode.php?media=".urlencode($dir);
 		}
 		$length = Media::movieInfo($dir,"length");
 		Media::videojsScripts();
